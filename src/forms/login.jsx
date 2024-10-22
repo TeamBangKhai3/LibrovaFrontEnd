@@ -1,4 +1,4 @@
-import '../App.css'
+ import '../App.css'
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import logotrans from '../assets/logotrans.png';
