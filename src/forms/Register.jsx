@@ -1,10 +1,58 @@
-import '../App.css'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Box, TextField, Button, Typography, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
 import logotrans from '../assets/logotrans.png';
 import loginbg from '../assets/loginbg.jpg';
 
 export default function Register() {
+    const [formData, setFormData] = useState({
+        username: '',
+        password: '',
+        confirmPassword: '',
+        email: '',
+        address: '',
+    });
+
+    const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        const { id, value } = e.target;
+        setFormData({ ...formData, [id]: value });
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.username) newErrors.username = 'Username is required';
+        if (!formData.email) newErrors.email = 'Email is required';
+        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+        if (!formData.password) newErrors.password = 'Password is required';
+        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+        if (!formData.address) newErrors.address = 'Address is required';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateForm()) return;
+
+        try {
+            const response = await axios.post('http://localhost:25566/auth/register', {
+                username: formData.username,
+                password: formData.password,
+                email: formData.email,
+                address: formData.address,
+            });
+            console.log('Registration successful:', response.data);
+            navigate('/login');
+        } catch (error) {
+            console.error('Registration error:', error);
+        }
+    };
+
     return (
         <Box
             component={"section"}
@@ -46,14 +94,18 @@ export default function Register() {
                 <Box component={"header"} mb={2}>
                     <Typography variant="h4" color="black" fontWeight={"bold"}>Register</Typography>
                 </Box>
-                <Box component={"form"} action="/register" method="post" display="flex" flexDirection="column" width="100%">
+                <Box component={"form"} onSubmit={handleSubmit} display="flex" flexDirection="column" width="100%">
                     <TextField
-                        id="name"
-                        label="Name"
+                        id="username"
+                        label="Username"
                         variant="outlined"
                         fullWidth
                         margin="dense"
                         required
+                        value={formData.username}
+                        onChange={handleChange}
+                        error={!!errors.username}
+                        helperText={errors.username}
                         InputProps={{ style: { backgroundColor: 'white' } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -76,12 +128,16 @@ export default function Register() {
                         }}
                     />
                     <TextField
-                        id="email-address"
+                        id="email"
                         label="Email Address"
                         variant="outlined"
                         fullWidth
                         margin="dense"
                         required
+                        value={formData.email}
+                        onChange={handleChange}
+                        error={!!errors.email}
+                        helperText={errors.email}
                         InputProps={{ style: { backgroundColor: 'white' } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -111,6 +167,10 @@ export default function Register() {
                         fullWidth
                         margin="dense"
                         required
+                        value={formData.password}
+                        onChange={handleChange}
+                        error={!!errors.password}
+                        helperText={errors.password}
                         InputProps={{ style: { backgroundColor: 'white' } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -133,13 +193,17 @@ export default function Register() {
                         }}
                     />
                     <TextField
-                        id="confirm-password"
+                        id="confirmPassword"
                         label="Confirm Password"
                         type="password"
                         variant="outlined"
                         fullWidth
                         margin="dense"
                         required
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        error={!!errors.confirmPassword}
+                        helperText={errors.confirmPassword}
                         InputProps={{ style: { backgroundColor: 'white' } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -162,42 +226,16 @@ export default function Register() {
                         }}
                     />
                     <TextField
-                        id="phone-number"
-                        label="Phone Number"
+                        id="address"
+                        label="Address"
                         variant="outlined"
                         fullWidth
                         margin="dense"
                         required
-                        InputProps={{ style: { backgroundColor: 'white' } }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
-                            },
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: 'black',
-                            },
-                        }}
-                    />
-                    <TextField
-                        id="date-of-birth"
-                        label="Date of Birth"
-                        type="date"
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        InputLabelProps={{ shrink: true }}
+                        value={formData.address}
+                        onChange={handleChange}
+                        error={!!errors.address}
+                        helperText={errors.address}
                         InputProps={{ style: { backgroundColor: 'white' } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {

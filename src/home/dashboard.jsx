@@ -6,6 +6,7 @@ import BookmarkBorderOutlined from '@mui/icons-material/BookmarkBorderOutlined';
 import LibraryBooksOutlined from '@mui/icons-material/LibraryBooksOutlined';
 import logotrans from '../assets/logotrans.png';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -48,7 +49,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export default function UserDashboard() {
     const settings = ['Account', 'Ebook Manager', 'Logout'];
-
+    const navigate = useNavigate();
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
     const handleOpenUserMenu = (event) => {
@@ -57,6 +58,15 @@ export default function UserDashboard() {
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('sessionToken');
+        navigate('/login');
+    };
+
+    const handleAccount = () => {
+        navigate('/accountsetting');
     };
 
     return (
@@ -108,7 +118,14 @@ export default function UserDashboard() {
                                 onClose={handleCloseUserMenu}
                             >
                                 {settings.map((setting) => (
-                                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                                    <MenuItem
+                                        key={setting}
+                                        onClick={() => {
+                                            handleCloseUserMenu();
+                                            if (setting === 'Logout') handleLogout();
+                                            if (setting === 'Account') handleAccount();
+                                        }}
+                                    >
                                         <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
                                     </MenuItem>
                                 ))}
@@ -133,7 +150,6 @@ export default function UserDashboard() {
                         Popular Books
                     </Typography>
                 </Box>
-
             </Box>
         </Box>
     );

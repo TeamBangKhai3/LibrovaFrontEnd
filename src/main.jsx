@@ -5,6 +5,7 @@ import Register from './forms/Register'
 import './index.css'
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import UserDashboard from "./home/dashboard";
+import AccountSetting from "./home/AccountSetting.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
@@ -14,6 +15,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/login" element={<Login/>} />
             <Route path="/register" element={<Register/>} />
             <Route path="/home" element={<UserDashboard/>} />
+                <Route path="/accountsetting" element={<AccountSetting/>} />
             {/*    <Route path="/lyrics/singer1" element={<App colorr={"#ADD8E6"} textInputHide={false} />} />*/}
             {/*    <Route path="/lyrics/singer2" element={<App colorr={"#FF77FF"} textInputHide={false} />} />*/}
             {/*    <Route path="/lyrics/singer3" element={<App colorr={"#FF9999"} textInputHide={false} />} />*/}
