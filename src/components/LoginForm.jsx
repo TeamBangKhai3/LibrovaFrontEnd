@@ -1,14 +1,15 @@
-import '../App.css';
-import { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography } from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Button, Typography, Alert } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import logotrans from '../assets/logotrans.png';
 import loginbg from '../assets/loginbg.jpg';
 
-export default function Login() {
+const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerRoute, forgotPasswordRoute }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [error, setError] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,25 +17,21 @@ export default function Login() {
             const token = localStorage.getItem('sessionToken');
             if (token) {
                 try {
-                    const response = await axios.get('http://localhost:25566/auth/ping', {
+                    const response = await axios.get(pingEndpoint, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
                     });
                     if (response.status === 200) {
-                        navigate('/home');
+                        navigate(redirectRoute);
                     }
                 } catch (error) {
-                    if (error.response && error.response.status === 403) {
-                        console.log('Token expired');
-                    } else {
-                        console.error('Ping error:', error);
-                    }
+                    console.error('Error checking session token:', error);
                 }
             }
         };
         checkSessionToken();
-    }, [navigate]);
+    }, [navigate, pingEndpoint, redirectRoute]);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
@@ -46,21 +43,18 @@ export default function Login() {
         setError(false);
 
         try {
-            const response = await axios.post('http://localhost:25566/auth/login', formData, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (response.status === 200) {
+            const response = await axios.post(authEndpoint, formData);
+            if (response.status === 200 && response.data) {
                 localStorage.setItem('sessionToken', response.data);
-                console.log(response.data);
-                navigate('/home');
+                navigate(redirectRoute);
+            } else {
+                setError(true);
             }
         } catch (error) {
             if (error.response && error.response.status === 401) {
                 setError(true);
             } else {
-                console.error('Login error:', error);
+                console.error('Error logging in:', error);
             }
         }
     };
@@ -103,7 +97,7 @@ export default function Login() {
             >
                 <Box component={"img"} src={logotrans} alt="logo" width={"100px"} height={"100px"} mb={2} />
                 <Box component={"header"} mb={2}>
-                    <Typography variant="h4" color="black" fontWeight={"bold"}>Login</Typography>
+                    <Typography variant="h4" color="black" fontWeight={"bold"}>{title}</Typography>
                 </Box>
                 <Box component={"form"} onSubmit={handleSubmit} display="flex" flexDirection="column" width="100%">
                     <TextField
@@ -112,7 +106,7 @@ export default function Login() {
                         variant="outlined"
                         fullWidth
                         margin="normal"
-                        required="true"
+                        required
                         value={formData.username}
                         onChange={handleChange}
                         error={error}
@@ -143,7 +137,7 @@ export default function Login() {
                         type="password"
                         variant="outlined"
                         fullWidth
-                        required="true"
+                        required
                         margin="normal"
                         value={formData.password}
                         onChange={handleChange}
@@ -174,7 +168,7 @@ export default function Login() {
                             Username or password is incorrect
                         </Typography>
                     )}
-                    <Link to="/forgot-password" style={{ alignSelf: 'flex-start', marginBottom: '16px' }}>Forgot Password?</Link>
+                    <Link to={forgotPasswordRoute} style={{ alignSelf: 'flex-start', marginBottom: '16px' }}>Forgot Password?</Link>
                     <Button
                         type="submit"
                         variant="contained"
@@ -191,9 +185,16 @@ export default function Login() {
                     </Button>
                 </Box>
                 <Typography variant="body2" mt={2} color={"black"}>
-                    Don&apos;t have an account? <Link to="/register">Sign up here</Link>
+                    Don&apos;t have an account? <Link to={registerRoute}>Sign up here</Link>
                 </Typography>
             </Box>
+            {showAlert && (
+                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2 }}>
+                    <Alert severity="success">{alertMessage}</Alert>
+                </Box>
+            )}
         </Box>
     );
-}
+};
+
+export default LoginForm;

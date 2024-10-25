@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Box, TextField, Button, Typography, Checkbox, FormControlLabel } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Box, TextField, Button, Typography, Checkbox, FormControlLabel, Alert } from "@mui/material";
 import logotrans from '../assets/logotrans.png';
 import loginbg from '../assets/loginbg.jpg';
 
-export default function Register() {
+const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
@@ -16,6 +15,8 @@ export default function Register() {
     });
 
     const [errors, setErrors] = useState({});
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -40,14 +41,19 @@ export default function Register() {
         if (!validateForm()) return;
 
         try {
-            const response = await axios.post('http://localhost:25566/auth/register', {
+            const response = await axios.post(registerEndpoint, {
                 username: formData.username,
                 password: formData.password,
                 email: formData.email,
                 address: formData.address,
             });
             console.log('Registration successful:', response.data);
-            navigate('/login');
+            localStorage.setItem('sessionToken', response.data); // Store the session token
+            setAlertMessage('Registered Successfully!');
+            setShowAlert(true);
+            setTimeout(() => {
+                navigate(redirectRoute); // Navigate to the home page or desired page
+            }, 3000); // Show alert for 3 seconds before navigating
         } catch (error) {
             console.error('Registration error:', error);
         }
@@ -92,7 +98,7 @@ export default function Register() {
             >
                 <Box component={"img"} src={logotrans} alt="logo" width={"100px"} height={"100px"} mb={2} />
                 <Box component={"header"} mb={2}>
-                    <Typography variant="h4" color="black" fontWeight={"bold"}>Register</Typography>
+                    <Typography variant="h4" color="black" fontWeight={"bold"}>{title}</Typography>
                 </Box>
                 <Box component={"form"} onSubmit={handleSubmit} display="flex" flexDirection="column" width="100%">
                     <TextField
@@ -278,9 +284,16 @@ export default function Register() {
                     </Button>
                 </Box>
                 <Typography variant="body2" mt={2} color={"black"}>
-                    Already have an account? <Link to="/login">Login here</Link>
+                    Already have an account? <Button onClick={() => navigate(loginRoute)}>Login here</Button>
                 </Typography>
             </Box>
+            {showAlert && (
+                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2 }}>
+                    <Alert severity="success">{alertMessage}</Alert>
+                </Box>
+            )}
         </Box>
-    )
-}
+    );
+};
+
+export default RegisterForm;

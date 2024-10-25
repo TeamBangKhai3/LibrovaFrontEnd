@@ -1,27 +1,25 @@
-import React from 'react';
-import { Box, Container, Toolbar, Typography, AppBar, IconButton, Menu, Avatar, Tooltip, MenuItem, InputBase, alpha, Button } from "@mui/material";
-import SearchIcon from '@mui/icons-material/Search';
-import ShoppingCartOutlined from '@mui/icons-material/ShoppingCartOutlined';
-import BookmarkBorderOutlined from '@mui/icons-material/BookmarkBorderOutlined';
-import LibraryBooksOutlined from '@mui/icons-material/LibraryBooksOutlined';
-import logotrans from '../assets/logotrans.png';
+import React, { useState, useEffect } from 'react';
+import { AppBar, Box, Container, Toolbar, IconButton, Typography, Avatar, Menu, MenuItem, ButtonBase, Button, InputBase } from '@mui/material';
+import { ShoppingCartOutlined, BookmarkBorderOutlined, LibraryBooksOutlined, Search as SearchIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import logotrans from '../assets/logotrans.png';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: '#FFFFFF', // Set background to white
-    border: '1px solid #D3D3D3', // Add a border to make it outlined
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #D3D3D3',
     '&:hover': {
-        backgroundColor: alpha('#FFFFFF', 0.9), // Slightly darker on hover
+        backgroundColor: theme.palette.action.hover,
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
-    width: '60svw', // Adjust the width here
-    height: '45px', // Adjust the height here
+    width: '55svw',
+    height: '45px',
     display: 'flex',
-    alignItems: 'center', // Vertically center the content
+    alignItems: 'center',
     color: 'black',
 }));
 
@@ -43,14 +41,37 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         paddingLeft: `calc(1em + ${theme.spacing(4)})`,
         transition: theme.transitions.create('width'),
         width: '100%',
-        height: '100%', // Make input height match the container
+        height: '100%',
     },
 }));
 
-export default function UserDashboard() {
+const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingRoute }) => {
     const settings = ['Account', 'Ebook Manager', 'Logout'];
     const navigate = useNavigate();
-    const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const [anchorElUser, setAnchorElUser] = useState(null);
+    const [username, setUsername] = useState('');
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const response = await axios.get(userInfoEndpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('sessionToken')}`
+                    }
+                });
+                if (response.status === 200) {
+                    setUsername(response.data.username);
+                } else {
+                    navigate(loginRoute);
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                navigate(loginRoute);
+            }
+        };
+
+        fetchUserInfo();
+    }, [navigate, userInfoEndpoint, loginRoute]);
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -62,19 +83,19 @@ export default function UserDashboard() {
 
     const handleLogout = () => {
         localStorage.removeItem('sessionToken');
-        navigate('/login');
+        navigate(loginRoute);
     };
 
     const handleAccount = () => {
-        navigate('/accountsetting');
+        navigate(accountSettingRoute);
     };
 
     return (
-        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <>
             <AppBar position="absolute" sx={{ height: '80px', bgcolor: 'white', boxShadow: 'none' }}>
                 <Container maxWidth="x1" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
                     <Toolbar disableGutters sx={{ width: '100%' }}>
-                        <Box component="img" src={logotrans} alt="Logo" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '60px', marginLeft: '20px', marginRight:'8svw' }} />
+                        <Box component="img" src={logotrans} alt="Logo" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '60px', marginLeft: '20px', marginRight:'5svw' }} />
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, alignItems: 'center', Width: '68svw', marginRight: '5svw' }}>
                             <Search>
                                 <SearchIconWrapper>
@@ -96,11 +117,12 @@ export default function UserDashboard() {
                             <IconButton sx={{ color: 'black', fontSize: '33px', marginRight: '10px' }}>
                                 <LibraryBooksOutlined sx={{ fontSize: 'inherit' }} />
                             </IconButton>
-                            <Tooltip title="Open settings">
-                                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                    <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-                                </IconButton>
-                            </Tooltip>
+                            <ButtonBase sx={{ display: 'flex', alignItems: 'center', color: 'black', marginRight: '10px' }} onClick={handleOpenUserMenu}>
+                                <Typography sx={{ marginRight: '10px' }}>
+                                    Hello, {username}
+                                </Typography>
+                                <Avatar />
+                            </ButtonBase>
                             <Menu
                                 sx={{ mt: '45px' }}
                                 id="menu-appbar"
@@ -137,20 +159,21 @@ export default function UserDashboard() {
             <AppBar position="relative" sx={{ height: '50px', bgcolor: '#E0E0E0', top: '80px', width: '100svw', boxShadow: 1 }}>
                 <Container maxWidth="xl" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
                     <Toolbar disableGutters sx={{ width: '100%', justifyContent: 'space-around' }}>
+                        <Button
+                            color="inherit"
+                            sx={{ color: 'black', fontWeight: 'bold' }}
+                            onClick={() => navigate(homeRoute)}
+                        >
+                            Home
+                        </Button>
                         <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>Books</Button>
                         <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>Genre</Button>
-                        <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>Category</Button>
                         <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>???</Button>
                     </Toolbar>
                 </Container>
             </AppBar>
-            <Box component="section" sx={{ marginTop: '120px', width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
-                <Box component="header" sx={{ marginLeft: '20px' }}>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                        Popular Books
-                    </Typography>
-                </Box>
-            </Box>
-        </Box>
+        </>
     );
-}
+};
+
+export default CustomAppBar;
