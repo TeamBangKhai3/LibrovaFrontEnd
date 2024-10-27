@@ -10,7 +10,28 @@ import {
 import Grid from '@mui/material/Grid2';
 import { PhotoCamera } from "@mui/icons-material";
 import { useNavigate } from 'react-router-dom';
+import { keyframes } from '@emotion/react';
 import CustomAppBar from '../components/CustomAppBar';
+import CustomBreadcrumbs from "../components/CustomBreadcrumbs.jsx";
+
+// Define keyframes for animations
+const fadeIn = keyframes`
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+`;
+
+const slideIn = keyframes`
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+`;
 
 export default function UserAccountSetting() {
     const navigate = useNavigate();
@@ -20,16 +41,25 @@ export default function UserAccountSetting() {
         password: '',
         address: ''
     });
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const userinfoEndpoint = `${backendUrl}/users/getuserinfo`;
+    const userupdateEndpoint = `${backendUrl}/users/updateuserinfo`;
+    const userdeleteEndpoint = `${backendUrl}/users/deleteuser`;
     const [deleteStep, setDeleteStep] = useState(0);
     const [openDialog, setOpenDialog] = useState(false);
     const [showUpdateAlert, setShowUpdateAlert] = useState(false);
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
+    const breadcrumbLinks = [
+        { label: 'User', path: '/user/home' },
+        { label: 'Home', path: '/user/home' },
+    ];
+
     useEffect(() => {
         const fetchUserInfo = async () => {
             const sessionToken = localStorage.getItem('sessionToken');
             try {
-                const response = await axios.get('http://localhost:25566/users/getuserinfo', {
+                const response = await axios.get(userinfoEndpoint, {
                     headers: {
                         'Authorization': `Bearer ${sessionToken}`
                     }
@@ -60,7 +90,7 @@ export default function UserAccountSetting() {
     const handleSave = async () => {
         const sessionToken = localStorage.getItem('sessionToken');
         try {
-            await axios.put('http://localhost:25566/users/updateuserinfo', values, {
+            await axios.put(userupdateEndpoint, values, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${sessionToken}`
@@ -79,7 +109,7 @@ export default function UserAccountSetting() {
     const handleDeleteAccount = async () => {
         const sessionToken = localStorage.getItem('sessionToken');
         try {
-            await axios.delete('http://localhost:25566/users/deleteuser', {
+            await axios.delete(userdeleteEndpoint, {
                 headers: {
                     'Authorization': `Bearer ${sessionToken}`
                 }
@@ -130,12 +160,15 @@ export default function UserAccountSetting() {
     return (
         <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <CustomAppBar
-                userInfoEndpoint="http://localhost:25566/users/getuserinfo"
+                userInfoEndpoint={userinfoEndpoint}
                 loginRoute="/user/login"
                 homeRoute="/user/home"
                 accountSettingRoute="/user/accountsetting"
             />
-            <Box component="section" sx={{ marginTop: '120px', width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
+            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <CustomBreadcrumbs links={breadcrumbLinks} current="Account Settings" sx={{ marginLeft: '4%' }} disabledLinks={['User']} />
+            </Box>
+            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
                 <Box component="header" sx={{ marginLeft: '80px' }}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                         Account Information(User)
@@ -206,18 +239,19 @@ export default function UserAccountSetting() {
                 </Grid>
             </Box>
             {showUpdateAlert && (
-                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2 }}>
+                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2, animation: `${slideIn} 0.5s ease-in-out` }}>
                     <Alert severity="success">Profile updated successfully.</Alert>
                 </Box>
             )}
             {showDeleteAlert && (
-                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2 }}>
+                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2, animation: `${slideIn} 0.5s ease-in-out` }}>
                     <Alert severity="success">Account deleted successfully.</Alert>
                 </Box>
             )}
             <Dialog
                 open={openDialog}
                 onClose={handleDialogClose}
+                sx={{ animation: `${fadeIn} 0.5s ease-in-out` }}
             >
                 <DialogTitle>Delete Account</DialogTitle>
                 <DialogContent>

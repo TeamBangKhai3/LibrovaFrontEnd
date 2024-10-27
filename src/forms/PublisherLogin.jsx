@@ -1,11 +1,13 @@
 import React from 'react';
 import LoginForm from '../components/LoginForm';
 
+
 const PublisherLogin = () => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     return (
         <LoginForm
-            pingEndpoint="http://localhost:25566/authpublisher/ping"
-            authEndpoint="http://localhost:25566/authpublisher/login"
+            pingEndpoint={`${backendUrl}/authpublisher/ping`}
+            authEndpoint={`${backendUrl}/authpublisher/login`}
             redirectRoute="/publisher/home"
             registerRoute="/publisher/register"
             forgotPasswordRoute="/publisher/forgotpassword"

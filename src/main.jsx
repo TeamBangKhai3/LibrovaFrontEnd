@@ -11,6 +11,8 @@ import UserAccountSetting from "./home/UserAccountSetting.jsx";
 import PublisherDashboard from "./home/PublisherDashboard.jsx";
 import PublisherLogin from  "./forms/PublisherLogin.jsx";
 import PublisherRegister  from "./forms/PublisherRegister.jsx";
+import PublisherAccountSetting from "./home/PublisherAccountSettings.jsx";
+import PublisherAddBook from "./forms/AddNewBook.jsx";
 
 
 createRoot(document.getElementById('root')).render(
@@ -25,7 +27,8 @@ createRoot(document.getElementById('root')).render(
             <Route path="/publisher/login" element={<PublisherLogin/>} />
             <Route path="/publisher/register" element={<PublisherRegister/>} />
             <Route path="/publisher/home" element={<PublisherDashboard/>} />
-            <Route path="/publisher/accountsetting" element={<PublisherDashboard/>} />
+            <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
+            <Route path="/publisher/addbook" element={<PublisherAddBook/>} />
 
 
          {/*    <Route path="/lyrics/singer1" element={<App colorr={"#ADD8E6"} textInputHide={false} />} />*/}

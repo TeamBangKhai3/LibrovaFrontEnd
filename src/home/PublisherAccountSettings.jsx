@@ -11,8 +11,10 @@ import Grid from '@mui/material/Grid2';
 import { PhotoCamera } from "@mui/icons-material";
 import { useNavigate } from 'react-router-dom';
 import CustomAppBar from '../components/CustomAppBar';
+import CustomBreadcrumbs from "../components/CustomBreadcrumbs.jsx";
 
 export default function UserAccountSetting() {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const navigate = useNavigate();
     const [userInfo, setUserInfo] = useState({});
     const [values, setValues] = useState({
@@ -24,12 +26,15 @@ export default function UserAccountSetting() {
     const [openDialog, setOpenDialog] = useState(false);
     const [showUpdateAlert, setShowUpdateAlert] = useState(false);
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const pubiinfoEndpoint = `${backendUrl}/publishers/getpublisherinfo`;
+    const pubiupdateEndpoint = `${backendUrl}/publishers/updatepublisherinfo`;
+    const pubideleteEndpoint = `${backendUrl}/publishers/deletepublisher`;
 
     useEffect(() => {
         const fetchUserInfo = async () => {
             const sessionToken = localStorage.getItem('sessionToken');
             try {
-                const response = await axios.get('http://localhost:25566/publishers/getpublisherinfo', {
+                const response = await axios.get(pubiinfoEndpoint, {
                     headers: {
                         'Authorization': `Bearer ${sessionToken}`
                     }
@@ -60,7 +65,7 @@ export default function UserAccountSetting() {
     const handleSave = async () => {
         const sessionToken = localStorage.getItem('sessionToken');
         try {
-            await axios.put('http://localhost:25566/publishers/updatepublisherinfo', values, {
+            await axios.put(pubiupdateEndpoint, values, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${sessionToken}`
@@ -79,7 +84,7 @@ export default function UserAccountSetting() {
     const handleDeleteAccount = async () => {
         const sessionToken = localStorage.getItem('sessionToken');
         try {
-            await axios.delete('http://localhost:25566/publishers/deletepublisher', {
+            await axios.delete(pubideleteEndpoint, {
                 headers: {
                     'Authorization': `Bearer ${sessionToken}`
                 }
@@ -127,18 +132,29 @@ export default function UserAccountSetting() {
         }
     };
 
+    const breadcrumbLinks = [
+        { label: 'Publisher', path: '/publisher/home' },
+        { label: 'Home', path: '/publisher/home' },
+    ];
+
+
+
+
     return (
         <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <CustomAppBar
-                userInfoEndpoint="http://localhost:25566/publishers/getpublisherinfo"
+                userInfoEndpoint={pubiinfoEndpoint}
                 loginRoute="/publisher/login"
                 homeRoute="/publisher/home"
                 accountSettingRoute="/publisher/accountsetting"
             />
-            <Box component="section" sx={{ marginTop: '120px', width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
+            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <CustomBreadcrumbs links={breadcrumbLinks} current="Account Settings" sx={{ marginLeft: '4%' }} disabledLinks={['Publisher']} />
+            </Box>
+            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
                 <Box component="header" sx={{ marginLeft: '80px' }}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                        Account Information(User)
+                        Account Information(Publisher)
                     </Typography>
                 </Box>
             </Box>

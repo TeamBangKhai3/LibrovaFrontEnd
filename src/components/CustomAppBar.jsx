@@ -92,7 +92,7 @@ const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingR
 
     return (
         <>
-            <AppBar position="absolute" sx={{ height: '80px', bgcolor: 'white', boxShadow: 'none' }}>
+            <AppBar position="sticky" sx={{ height: '80px', bgcolor: 'white', boxShadow: 'none',width:'100svw' }}>
                 <Container maxWidth="x1" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
                     <Toolbar disableGutters sx={{ width: '100%' }}>
                         <Box component="img" src={logotrans} alt="Logo" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '60px', marginLeft: '20px', marginRight:'5svw' }} />
@@ -156,7 +156,7 @@ const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingR
                     </Toolbar>
                 </Container>
             </AppBar>
-            <AppBar position="relative" sx={{ height: '50px', bgcolor: '#E0E0E0', top: '80px', width: '100svw', boxShadow: 1 }}>
+            <AppBar position="sticky" sx={{ height: '50px', bgcolor: '#E0E0E0', top: '80px', width: '100svw', boxShadow: 1 }}>
                 <Container maxWidth="xl" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
                     <Toolbar disableGutters sx={{ width: '100%', justifyContent: 'space-around' }}>
                         <Button

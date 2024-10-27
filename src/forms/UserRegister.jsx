@@ -3,9 +3,10 @@ import React from 'react';
 import RegisterForm from '../components/RegisterForm';
 
 const UserRegister = () => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     return (
         <RegisterForm
-            registerEndpoint="http://localhost:25566/authuser/register"
+            registerEndpoint={`${backendUrl}authuser/register`}
             redirectRoute="/user/home"
             title="User Register"
             loginRoute="/user/login"

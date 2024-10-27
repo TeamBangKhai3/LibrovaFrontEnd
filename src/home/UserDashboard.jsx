@@ -1,25 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import {Box, Container, Typography, AppBar, Button, Toolbar} from "@mui/material";
+import React from 'react';
+import { Box, Typography } from "@mui/material";
 import CustomAppBar from '../components/CustomAppBar';
+import CustomBreadcrumbs from '../components/CustomBreadcrumbs';
+import BookCarousel from '../components/BookCarousel'; // Import the BookCarousel component
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 export default function UserDashboard() {
     const navigate = useNavigate();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    const breadcrumbLinks = [
+        { label: 'User', path: '/user/home' },
+    ];
 
     return (
-        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden' }}>
             <CustomAppBar
-                userInfoEndpoint="http://localhost:25566/users/getuserinfo"
+                userInfoEndpoint={`${backendUrl}/users/getuserinfo`}
                 loginRoute="/user/login"
                 homeRoute="/user/home"
                 accountSettingRoute="/user/accountsetting"
             />
-            <Box component="section" sx={{ marginTop: '120px', width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
-                <Box component="header" sx={{ marginLeft: '20px' }}>
+            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <CustomBreadcrumbs links={breadcrumbLinks} current="Home" sx={{ marginLeft: '5%' }} disabledLinks={['User']} />
+            </Box>
+            <Box component="section" sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <Box component="section" sx={{ marginLeft: '8svw', marginTop: '16px' ,display:'flex'}}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                         Books You Bought (But Haven't Read Yet)
                     </Typography>
+                </Box>
+                <Box component="section" sx={{ marginTop: '20px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden'}}>
+                    <BookCarousel />
                 </Box>
             </Box>
         </Box>
