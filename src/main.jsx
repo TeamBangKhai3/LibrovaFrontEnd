@@ -13,28 +13,26 @@ import PublisherLogin from  "./forms/PublisherLogin.jsx";
 import PublisherRegister  from "./forms/PublisherRegister.jsx";
 import PublisherAccountSetting from "./home/PublisherAccountSettings.jsx";
 import PublisherAddBook from "./forms/AddNewBook.jsx";
+import ProductView from "./home/ProductView.jsx"
+import EditBook from "./forms/EditBook.jsx";
 
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <BrowserRouter>
             <Routes>
-            <Route path="/" element={<Navigate to="/user/login" />} />
-            <Route path="/user/login" element={<UsrLogin/>} />
-            <Route path="/user/register" element={<UsrRegister/>} />
-            <Route path="/user/home" element={<UserDashboard/>} />
-            <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
-            <Route path="/publisher/login" element={<PublisherLogin/>} />
-            <Route path="/publisher/register" element={<PublisherRegister/>} />
-            <Route path="/publisher/home" element={<PublisherDashboard/>} />
-            <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
-            <Route path="/publisher/addbook" element={<PublisherAddBook/>} />
-
-
-         {/*    <Route path="/lyrics/singer1" element={<App colorr={"#ADD8E6"} textInputHide={false} />} />*/}
-            {/*    <Route path="/lyrics/singer2" element={<App colorr={"#FF77FF"} textInputHide={false} />} />*/}
-            {/*    <Route path="/lyrics/singer3" element={<App colorr={"#FF9999"} textInputHide={false} />} />*/}
-            {/*    <Route path="/lyrics/singer4" element={<App colorr={"#FFD580"} textInputHide={false} />} />*/}
+                <Route path="/" element={<Navigate to="/user/login" />} />
+                <Route path="/user/login" element={<UsrLogin/>} />
+                <Route path="/user/register" element={<UsrRegister/>} />
+                <Route path="/user/home" element={<UserDashboard/>} />
+                <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
+                <Route path="/publisher/login" element={<PublisherLogin/>} />
+                <Route path="/publisher/register" element={<PublisherRegister/>} />
+                <Route path="/publisher/home" element={<PublisherDashboard/>} />
+                <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
+                <Route path="/publisher/addbook" element={<PublisherAddBook/>} />
+                <Route path="publisher/home/ebookinfo/:id" element={<ProductView/>} />
+                <Route path="publisher/home/ebookinfo/editinfo/:id" element={<EditBook/>} />
             </Routes>
         </BrowserRouter>
     </StrictMode>

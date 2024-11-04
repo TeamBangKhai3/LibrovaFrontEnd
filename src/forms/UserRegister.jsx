@@ -6,7 +6,7 @@ const UserRegister = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     return (
         <RegisterForm
-            registerEndpoint={`${backendUrl}authuser/register`}
+            registerEndpoint={`${backendUrl}/authuser/register`}
             redirectRoute="/user/home"
             title="User Register"
             loginRoute="/user/login"

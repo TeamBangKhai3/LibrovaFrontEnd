@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
     Box,
@@ -11,14 +11,22 @@ import {
     Alert,
     MenuItem,
     Select,
-    FormControl, InputLabel
+    FormControl, InputLabel,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import CustomAppBar from "../components/CustomAppBar.jsx";
 import CustomBreadcrumbs from "../components/CustomBreadcrumbs.jsx";
 import Grid from "@mui/material/Grid2";
+import { useParams, useNavigate } from 'react-router-dom';
 
-const AddNewBook = () => {
+export default function EditBook() {
+    const { id } = useParams();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: '',
         author: '',
@@ -31,14 +39,31 @@ const AddNewBook = () => {
     const [uploadError, setUploadError] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [submitError, setSubmitError] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [deleteSuccess, setDeleteSuccess] = useState(false);
+    const [deleteError, setDeleteError] = useState(false);
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const pubiinfoEndpoint = `${backendUrl}/publishers/getpublisherinfo`;
-    const addEbookEndpoint = `${backendUrl}/ebook/addebook`;
+    const getEbookEndpoint = `${backendUrl}/ebook/getebook/${id}`;
+    const updateEbookEndpoint = `${backendUrl}/ebook/updateebook`;
+    const deleteEbookEndpoint = `${backendUrl}/ebook/deleteebook/${id}`;
     const breadcrumbLinks = [
         { label: 'Publisher', path: '/publisher/home' },
         { label: 'Home', path: '/publisher/home' },
     ];
+
+    useEffect(() => {
+        const fetchBookData = async () => {
+            try {
+                const response = await axios.get(getEbookEndpoint);
+                setFormData(response.data);
+            } catch (error) {
+                console.error('Error fetching book data:', error);
+            }
+        };
+        fetchBookData();
+    }, [id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -68,20 +93,41 @@ const AddNewBook = () => {
         e.preventDefault();
         const sessionToken = localStorage.getItem('sessionToken');
         try {
-            const response = await axios.post(addEbookEndpoint, formData, {
+            const response = await axios.put(updateEbookEndpoint, { ...formData, eBookID: id }, {
                 headers: {
                     'Authorization': `Bearer ${sessionToken}`
                 }
             });
-            console.log('Book added successfully:', response.data);
+            console.log('Book updated successfully:', response.data);
             setSubmitSuccess(true);
-            setTimeout(
-                () => window.location.replace('/publisher/home'), // Redirect to the publisher home page
-            )
         } catch (error) {
-            console.error('Error adding book:', error);
+            console.error('Error updating book:', error);
             setSubmitError(true);
         }
+    };
+
+    const handleDelete = async () => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        try {
+            await axios.delete(deleteEbookEndpoint, {
+                headers: {
+                    'Authorization': `Bearer ${sessionToken}`
+                }
+            });
+            setDeleteSuccess(true);
+            navigate('/publisher/home');
+        } catch (error) {
+            console.error('Error deleting book:', error);
+            setDeleteError(true);
+        }
+    };
+
+    const handleDialogOpen = () => {
+        setOpenDialog(true);
+    };
+
+    const handleDialogClose = () => {
+        setOpenDialog(false);
     };
 
     return (
@@ -94,7 +140,7 @@ const AddNewBook = () => {
             />
 
             <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <CustomBreadcrumbs links={breadcrumbLinks} current="Add New Book" sx={{ marginLeft: '4%' }} disabledLinks={['Publisher']} />
+                <CustomBreadcrumbs links={breadcrumbLinks} current="Edit Book" sx={{ marginLeft: '4%' }} disabledLinks={['Publisher']} />
             </Box>
             <Box component="section" sx={{marginTop:'5svh',width:'80svw',height:'65svh',bgcolor:'#D9D9D9', borderRadius:'20px'}}>
                 <Grid container spacing={1}>
@@ -153,8 +199,11 @@ const AddNewBook = () => {
                                 fullWidth
                             />
                             <Box component="section" sx={{display:'flex',justifyContent:'flex-end'}}>
+                                <Button variant="contained" color="error" onClick={handleDialogOpen} sx={{marginLeft:'10px'}}>
+                                    Delete Book
+                                </Button>
                                 <Button variant="contained" color="primary" onClick={handleSubmit} sx={{marginLeft:'10px'}}>
-                                    Create New Book
+                                    Update Book
                                 </Button>
                             </Box>
                         </Stack>
@@ -187,16 +236,39 @@ const AddNewBook = () => {
             </Snackbar>
             <Snackbar open={submitSuccess} autoHideDuration={6000} onClose={() => setSubmitSuccess(false)}>
                 <Alert onClose={() => setSubmitSuccess(false)} severity="success" sx={{ width: '100%' }}>
-                    Book Added Successfully
+                    Book Updated Successfully
                 </Alert>
             </Snackbar>
             <Snackbar open={submitError} autoHideDuration={6000} onClose={() => setSubmitError(false)}>
                 <Alert onClose={() => setSubmitError(false)} severity="error" sx={{ width: '100%' }}>
-                    Error Adding Book
+                    Error Updating Book
                 </Alert>
             </Snackbar>
+            <Snackbar open={deleteSuccess} autoHideDuration={6000} onClose={() => setDeleteSuccess(false)}>
+                <Alert onClose={() => setDeleteSuccess(false)} severity="success" sx={{ width: '100%' }}>
+                    Book Deleted Successfully
+                </Alert>
+            </Snackbar>
+            <Snackbar open={deleteError} autoHideDuration={6000} onClose={() => setDeleteError(false)}>
+                <Alert onClose={() => setDeleteError(false)} severity="error" sx={{ width: '100%' }}>
+                    Error Deleting Book
+                </Alert>
+            </Snackbar>
+            <Dialog
+                open={openDialog}
+                onClose={handleDialogClose}
+            >
+                <DialogTitle>Delete Book</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete this book? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>No</Button>
+                    <Button onClick={handleDelete} autoFocus>Yes</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
-};
-
-export default AddNewBook;
+}

@@ -117,7 +117,7 @@ export default function UserAccountSetting() {
             setShowDeleteAlert(true); // Show success alert for delete
             localStorage.removeItem('sessionToken'); // Remove session token after successful deletion
             setTimeout(() => {
-                navigate('/login');
+                navigate('/user/login');
             }, 3000); // Redirect after 3 seconds
         } catch (error) {
             console.error('Error deleting account:', error);

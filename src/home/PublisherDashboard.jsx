@@ -1,10 +1,9 @@
 import React from 'react';
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import CustomAppBar from '../components/CustomAppBar';
 import CustomBreadcrumbs from '../components/CustomBreadcrumbs';
-import BookCarousel from '../components/BookCarousel'; // Import the BookCarousel component
-import { useNavigate } from 'react-router-dom';
 import BookGrid from "../components/BookGrid.jsx";
+import { useNavigate } from 'react-router-dom';
 
 export default function PublisherDashboard() {
     const navigate = useNavigate();
@@ -14,8 +13,12 @@ export default function PublisherDashboard() {
         { label: 'Publisher', path: '/publisher/home' },
     ];
 
+    const handleAddBook = () => {
+        navigate('/publishers/addbook');
+    };
+
     return (
-        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden',width:'100vw' }}>
+        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden', width: '100vw' }}>
             <CustomAppBar
                 userInfoEndpoint={`${backendUrl}/publishers/getpublisherinfo`}
                 loginRoute="/publisher/login"
