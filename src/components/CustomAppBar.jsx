@@ -95,7 +95,9 @@ const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingR
             <AppBar position="sticky" sx={{ height: '80px', bgcolor: 'white', boxShadow: 'none',width:'100svw' }}>
                 <Container maxWidth="x1" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
                     <Toolbar disableGutters sx={{ width: '100%' }}>
-                        <Box component="img" src={logotrans} alt="Logo" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '60px', marginLeft: '20px', marginRight:'5svw' }} />
+                        <ButtonBase onClick={() => navigate(homeRoute)}>
+                            <Box component="img" src={logotrans} alt="Logo" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '60px', marginLeft: '20px', marginRight: '5svw' }} />
+                        </ButtonBase>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, alignItems: 'center', Width: '68svw', marginRight: '5svw' }}>
                             <Search>
                                 <SearchIconWrapper>

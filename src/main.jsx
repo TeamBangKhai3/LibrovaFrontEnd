@@ -13,7 +13,7 @@ import PublisherLogin from  "./forms/PublisherLogin.jsx";
 import PublisherRegister  from "./forms/PublisherRegister.jsx";
 import PublisherAccountSetting from "./home/PublisherAccountSettings.jsx";
 import PublisherAddBook from "./forms/AddNewBook.jsx";
-import ProductView from "./home/ProductView.jsx"
+import PublisherProductView from "./home/PublisherProductView.jsx"
 import EditBook from "./forms/EditBook.jsx";
 
 
@@ -31,7 +31,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/publisher/home" element={<PublisherDashboard/>} />
                 <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
                 <Route path="/publisher/addbook" element={<PublisherAddBook/>} />
-                <Route path="publisher/home/ebookinfo/:id" element={<ProductView/>} />
+                <Route path="publisher/home/ebookinfo/:id" element={<PublisherProductView/>} />
                 <Route path="publisher/home/ebookinfo/editinfo/:id" element={<EditBook/>} />
             </Routes>
         </BrowserRouter>

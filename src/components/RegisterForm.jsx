@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Box, TextField, Button, Typography, Checkbox, FormControlLabel, Alert } from "@mui/material";
+import { Box, TextField, Button, Typography, Checkbox, FormControlLabel, Alert, IconButton, InputAdornment } from "@mui/material";
 import logotrans from '../assets/logotrans.png';
 import loginbg from '../assets/loginbg.jpg';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) => {
     const [formData, setFormData] = useState({
@@ -17,6 +19,8 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
     const [errors, setErrors] = useState({});
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -57,6 +61,14 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
         } catch (error) {
             console.error('Registration error:', error);
         }
+    };
+
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const handleClickShowConfirmPassword = () => {
+        setShowConfirmPassword(!showConfirmPassword);
     };
 
     return (
@@ -168,7 +180,7 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                     <TextField
                         id="password"
                         label="Password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         variant="outlined"
                         fullWidth
                         margin="dense"
@@ -177,7 +189,20 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                         onChange={handleChange}
                         error={!!errors.password}
                         helperText={errors.password}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
+                        InputProps={{
+                            style: { backgroundColor: 'white' },
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
@@ -201,7 +226,7 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                     <TextField
                         id="confirmPassword"
                         label="Confirm Password"
-                        type="password"
+                        type={showConfirmPassword ? 'text' : 'password'}
                         variant="outlined"
                         fullWidth
                         margin="dense"
@@ -210,7 +235,20 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                         onChange={handleChange}
                         error={!!errors.confirmPassword}
                         helperText={errors.confirmPassword}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
+                        InputProps={{
+                            style: { backgroundColor: 'white' },
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle confirm password visibility"
+                                        onClick={handleClickShowConfirmPassword}
+                                        edge="end"
+                                    >
+                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {

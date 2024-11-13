@@ -21,7 +21,6 @@ export default function UserDashboard() {
                 homeRoute="/user/home"
                 accountSettingRoute="/user/accountsetting"
             />
-5
             <Box component="section" sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Box component="section" sx={{ marginLeft: '8svw', marginTop: '16px' ,display:'flex'}}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>

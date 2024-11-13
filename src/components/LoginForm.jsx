@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Alert } from "@mui/material";
+import { Box, TextField, Button, Typography, IconButton, InputAdornment } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import logotrans from '../assets/logotrans.png';
 import loginbg from '../assets/loginbg.jpg';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerRoute, forgotPasswordRoute }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [error, setError] = useState(false);
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -41,6 +43,7 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(false);
+        setErrorMessage('');
 
         try {
             const response = await axios.post(authEndpoint, formData);
@@ -49,14 +52,21 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                 navigate(redirectRoute);
             } else {
                 setError(true);
+                setErrorMessage('Bad credentials');
             }
         } catch (error) {
-            if (error.response && error.response.status === 401) {
+            if (error.response && error.response.status === 403) {
                 setError(true);
+                setErrorMessage('Bad credentials');
             } else {
-                console.error('Error logging in:', error);
+                setError(true);
+                setErrorMessage('Error logging in');
             }
         }
+    };
+
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword);
     };
 
     return (
@@ -134,7 +144,7 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                     <TextField
                         id="password"
                         label="Password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         variant="outlined"
                         fullWidth
                         required
@@ -142,7 +152,20 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                         value={formData.password}
                         onChange={handleChange}
                         error={error}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
+                        InputProps={{
+                            style: { backgroundColor: 'white' },
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
@@ -165,7 +188,7 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                     />
                     {error && (
                         <Typography color="error" sx={{ alignSelf: 'center', mb: 2 }}>
-                            Username or password is incorrect
+                            {errorMessage}
                         </Typography>
                     )}
                     <Link to={forgotPasswordRoute} style={{ alignSelf: 'flex-start', marginBottom: '16px' }}>Forgot Password?</Link>
@@ -188,11 +211,6 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                     Don&apos;t have an account? <Link to={registerRoute}>Sign up here</Link>
                 </Typography>
             </Box>
-            {showAlert && (
-                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2 }}>
-                    <Alert severity="success">{alertMessage}</Alert>
-                </Box>
-            )}
         </Box>
     );
 };
