@@ -7,10 +7,11 @@ import CustomBreadcrumbs from '../components/CustomBreadcrumbs.jsx';
 import Grid from '@mui/material/Grid2';
 import { Rating } from "@mui/lab";
 
-export default function ProductView() {
+export default function PublisherProductView() {
     const { id } = useParams(); // Get the eBookID from the URL
     const [book, setBook] = useState({});
     const [title, setTitle] = useState(null);
+    const [averageRating, setAverageRating] = useState(0);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -54,13 +55,25 @@ export default function ProductView() {
         const fetchBook = async () => {
             try {
                 const response = await axios.get(`${backendUrl}/ebook/getebook/${id}`);
+                console.table(response.data);
                 setBook(response.data);
                 setTitle(response.data.title);
             } catch (error) {
                 console.error('Error fetching book:', error);
             }
         };
+
+        const fetchAverageRating = async () => {
+            try {
+                const response = await axios.get(`http://192.168.193.106:25566/reviews/getaveragerating/${id}`);
+                setAverageRating(response.data);
+            } catch (error) {
+                console.error('Error fetching average rating:', error);
+            }
+        };
+
         fetchBook();
+        fetchAverageRating();
     }, [id, backendUrl]);
 
     return (
@@ -88,23 +101,22 @@ export default function ProductView() {
                                     {book.title}
                                 </Typography>
                                 <Typography variant="subtitle1" sx={{ marginBottom: '5%' }}>
-                                    Author: {book.author}
+                                    Author: {book.author}<br/>
+                                    Genre: {book.genre}
                                 </Typography>
                                 <Typography variant="body1" sx={{marginBottom: '1%'}}>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pulvinar ultricies
-                                    iaculis. Vestibulum posuere congue quam, nec varius elit. Cras quam dui,
-                                    pellentesque nec lectus et, ultrices euismod urna. Quisque mollis, enim at tempus
-                                    ornare, quam urna bibendum enim, non ullamcorper velit ex non elit. Nulla ipsum
-                                    eros, malesuada non imperdiet at, auctor ut quam. Mauris sit amet egestas eros, eget
-                                    lobortis lectus. Proin ullamcorper a odio consequat eleifend.<br/><br/>
-
+                                    {book.description}
+                                    <br/><br/>
                                 </Typography>
                                 <Typography variant="h6" sx={{ marginBottom: '1%' }}>
-                                    Ratings: <Rating value={3.5} readOnly />
+                                    Ratings: <Rating value={averageRating} readOnly />
                                 </Typography>
-                                <Typography variant="h6" sx={{ marginBottom: '7%' }}>
-                                    Books Sold: <b>1234</b>
+                                <Typography variant="h6" sx={{marginBottom: '7%'}}>
+                                    Books Sold: <b>1234</b><br/>
+                                    Price: <b>₱{book.price}</b><br/>
+                                    ISBN: <b>{book.isbn}</b>
                                 </Typography>
+
                                 <Button variant="contained" color="primary" sx={{ width: '100%', marginTop: '20px' }} onClick={() => handleBookClick(book.eBookID)}>
                                     Manage Book
                                 </Button>
@@ -117,6 +129,11 @@ export default function ProductView() {
                 ) : (
                     <Typography variant="h6" sx={{ marginTop: '20px' }}>Loading...</Typography>
                 )}
+            </Box>
+            <Box>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', marginTop: '20px' }}>
+                    Reviews
+                </Typography>
             </Box>
             <Dialog
                 open={openDialog}
