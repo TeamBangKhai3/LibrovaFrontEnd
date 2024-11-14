@@ -12,6 +12,7 @@ export default function PublisherDashboard() {
     const breadcrumbLinks = [
         { label: 'Publisher', path: '/publisher/home' },
     ];
+    document.title = "Dashboard | Librova";
 
     const handleAddBook = () => {
         navigate('/publishers/addbook');

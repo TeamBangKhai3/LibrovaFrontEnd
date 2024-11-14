@@ -4,6 +4,7 @@ import LoginForm from '../components/LoginForm';
 
 const UserLogin = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    document.title = "User Login";
     return (
         <LoginForm
             pingEndpoint={`${backendUrl}/authuser/ping`}

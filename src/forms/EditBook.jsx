@@ -25,6 +25,7 @@ import Grid from "@mui/material/Grid2";
 import { useParams, useNavigate } from 'react-router-dom';
 
 export default function EditBook() {
+    document.title = "Edit Book | Librova";
     const { id } = useParams();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({

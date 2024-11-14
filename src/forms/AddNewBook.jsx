@@ -40,6 +40,7 @@ const AddNewBook = () => {
         { label: 'Publisher', path: '/publisher/home' },
         { label: 'Home', path: '/publisher/home' },
     ];
+    document.title = "Add Book | Librova";
 
     const handleChange = (e) => {
         const { name, value } = e.target;

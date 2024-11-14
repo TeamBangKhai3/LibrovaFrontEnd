@@ -5,6 +5,7 @@ import CustomAppBar from '../components/CustomAppBar';
 import {Box} from "@mui/material";
 
 export default function PublisherAccountSetting() {
+    document.title = "Account Settings | Librova";
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const userinfoEndpoint = `${backendUrl}/publishers/getpublisherinfo`;

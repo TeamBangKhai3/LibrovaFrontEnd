@@ -21,6 +21,7 @@ import { Rating } from "@mui/lab";
 import './PublisherProductView.css'; // Import the CSS file
 
 export default function PublisherProductView() {
+    document.title = "Product View | Librova";
     const { id } = useParams(); // Get the eBookID from the URL
     const [book, setBook] = useState({});
     const [title, setTitle] = useState(null);
@@ -136,7 +137,6 @@ export default function PublisherProductView() {
                                     Ratings: <Rating value={averageRating} readOnly />
                                 </Typography>
                                 <Typography variant="h6" sx={{marginBottom: '7%'}}>
-                                    Books Sold: <b>1234</b><br/>
                                     Price: <b>₱{book.price}</b><br/>
                                     ISBN: <b>{book.isbn}</b>
                                 </Typography>

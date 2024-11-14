@@ -9,6 +9,8 @@ export default function UserDashboard() {
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+    document.title = "Homepage | Librova";
+
     const breadcrumbLinks = [
         { label: 'User', path: '/user/home' },
     ];

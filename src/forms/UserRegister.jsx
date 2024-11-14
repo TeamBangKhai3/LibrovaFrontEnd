@@ -4,6 +4,7 @@ import RegisterForm from '../components/RegisterForm';
 
 const UserRegister = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    document.title = "User Register";
     return (
         <RegisterForm
             registerEndpoint={`${backendUrl}/authuser/register`}

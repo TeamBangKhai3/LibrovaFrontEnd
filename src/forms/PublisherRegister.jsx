@@ -4,6 +4,7 @@ import RegisterForm from '../components/RegisterForm';
 
 const PublisherRegister = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    document.title = "Publisher Register";
     return (
         <RegisterForm
             registerEndpoint={`${backendUrl}/authpublisher/register`}
