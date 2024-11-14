@@ -15,6 +15,7 @@ import PublisherAccountSetting from "./home/PublisherAccountSettings.jsx";
 import PublisherAddBook from "./forms/AddNewBook.jsx";
 import PublisherProductView from "./home/PublisherProductView.jsx"
 import EditBook from "./forms/EditBook.jsx";
+import UserProductView from "./home/UserProductView.jsx";
 
 
 createRoot(document.getElementById('root')).render(
@@ -26,6 +27,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/user/register" element={<UsrRegister/>} />
                 <Route path="/user/home" element={<UserDashboard/>} />
                 <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
+                <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
                 <Route path="/publisher/login" element={<PublisherLogin/>} />
                 <Route path="/publisher/register" element={<PublisherRegister/>} />
                 <Route path="/publisher/home" element={<PublisherDashboard/>} />

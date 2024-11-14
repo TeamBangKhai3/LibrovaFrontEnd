@@ -2,16 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import CustomAppBar from '../components/CustomAppBar.jsx';
-import { Box, Button, Typography, Backdrop, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import {
+    Box,
+    Button,
+    Typography,
+    Backdrop,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Paper
+} from '@mui/material';
 import CustomBreadcrumbs from '../components/CustomBreadcrumbs.jsx';
 import Grid from '@mui/material/Grid2';
 import { Rating } from "@mui/lab";
+import './PublisherProductView.css'; // Import the CSS file
 
 export default function PublisherProductView() {
     const { id } = useParams(); // Get the eBookID from the URL
     const [book, setBook] = useState({});
     const [title, setTitle] = useState(null);
     const [averageRating, setAverageRating] = useState(0);
+    const [reviews, setReviews] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -72,8 +86,18 @@ export default function PublisherProductView() {
             }
         };
 
+        const fetchReviews = async () => {
+            try {
+                const response = await axios.get(`http://192.168.193.106:25566/reviews/getallreviews/${id}`);
+                setReviews(response.data);
+            } catch (error) {
+                console.error('Error fetching reviews:', error);
+            }
+        };
+
         fetchBook();
         fetchAverageRating();
+        fetchReviews();
     }, [id, backendUrl]);
 
     return (
@@ -87,7 +111,7 @@ export default function PublisherProductView() {
             <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <CustomBreadcrumbs links={breadcrumbLinks} current={title} sx={{ marginLeft: '5%' }} disabledLinks={['Publisher']} />
             </Box>
-            <Box component="section" sx={{ width: '85%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box component="section" className="scrollable-content" sx={{ width: '85%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {book && book.cover ? (
                     <Grid container spacing={1} sx={{ width: '90%', marginTop: '20px', flexWrap: 'nowrap' }}>
                         <Grid size={4} sx={{ width: '35%', p: '3%' }}>
@@ -129,12 +153,24 @@ export default function PublisherProductView() {
                 ) : (
                     <Typography variant="h6" sx={{ marginTop: '20px' }}>Loading...</Typography>
                 )}
+                <Box component={"section"} width={"100%"} height={"30svh"}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold', marginTop: '20px', marginBottom: '50px' }}>
+                        Reviews
+                    </Typography>
+                    {reviews.map((review) => (
+                        <Box key={review.reviewID} sx={{ marginBottom: '20px', width: '100%' }}>
+                            <Paper elevation={3} sx={{ padding: '20px' }}>
+                                <Typography variant="body1"><b>{review.user.name || 'Anonymous'}</b></Typography>
+                                <Rating value={review.rating} readOnly />
+                                <Typography variant="body1">{review.reviewText}</Typography>
+                                <Typography variant="body2" color="textSecondary">{new Date(review.date).toLocaleDateString()}</Typography>
+                            </Paper>
+                        </Box>
+                    ))}
+                </Box>
+
             </Box>
-            <Box>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', marginTop: '20px' }}>
-                    Reviews
-                </Typography>
-            </Box>
+
             <Dialog
                 open={openDialog}
                 onClose={handleDialogClose}

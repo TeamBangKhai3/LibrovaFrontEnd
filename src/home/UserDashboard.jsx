@@ -24,7 +24,7 @@ export default function UserDashboard() {
             <Box component="section" sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Box component="section" sx={{ marginLeft: '8svw', marginTop: '16px' ,display:'flex'}}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                        Books You Bought (But Haven't Read Yet)
+                        Books to Read
                     </Typography>
                 </Box>
                 <Box component="section" sx={{ marginTop: '20px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden'}}>

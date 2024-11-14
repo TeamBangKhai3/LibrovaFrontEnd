@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Box, Typography, Card, CardContent, CardMedia, IconButton } from '@mui/material';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
@@ -8,9 +9,11 @@ const BookCarousel = ({ sx }) => {
     const [visibleBooks, setVisibleBooks] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [booksPerRow, setBooksPerRow] = useState(3);
+    const [loading, setLoading] = useState(true);
     const resizeTimeout = useRef(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const getallebooks = `${backendUrl}/ebook/getallebooks`;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchBooks = async () => {
@@ -20,6 +23,8 @@ const BookCarousel = ({ sx }) => {
                 setVisibleBooks(response.data.slice(0, booksPerRow - 1));
             } catch (error) {
                 console.error('Error fetching books:', error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchBooks();
@@ -59,12 +64,20 @@ const BookCarousel = ({ sx }) => {
         setVisibleBooks(books.slice(prevIndex, prevIndex + booksPerRow - 1));
     };
 
+    const handleBookClick = (id) => {
+        navigate(`/user/home/ebookinfo/${id}`);
+    };
+
+    if (loading) {
+        return null;
+    }
+
     return (
         <Box className="book-carousel-container" sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '95%', whiteSpace: 'nowrap', overflowX: 'hidden', ...sx }}>
             <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'hidden', width: '100%', justifyContent: 'center' }}>
                 {visibleBooks.map((book) => (
-                    <Box key={book.eBookID} sx={{ margin: '10px' }}>
-                        <Card sx={{ width: 200, height: 450, border: '1px solid #ccc', boxShadow: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box key={book.eBookID} sx={{ margin: '10px' }} onClick={() => handleBookClick(book.eBookID)}>
+                        <Card sx={{ width: 200, height: 450, border: '1px solid #ccc', boxShadow: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
                             <CardMedia
                                 component="img"
                                 image={`data:image/png;base64,${book.cover}`}

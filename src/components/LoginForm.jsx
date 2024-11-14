@@ -7,7 +7,7 @@ import loginbg from '../assets/loginbg.jpg';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerRoute, forgotPasswordRoute }) => {
+const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerRoute, forgotPasswordRoute,alternativeRoute, alternativeTitle }) => {
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -208,7 +208,8 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                     </Button>
                 </Box>
                 <Typography variant="body2" mt={2} color={"black"}>
-                    Don&apos;t have an account? <Link to={registerRoute}>Sign up here</Link>
+                    Don&apos;t have an account? <Link to={registerRoute}>Sign up here</Link><br/>
+                    {alternativeTitle} <Link to={alternativeRoute}>Log in here</Link>
                 </Typography>
             </Box>
         </Box>

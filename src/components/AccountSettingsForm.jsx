@@ -47,6 +47,7 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
         password: '',
         address: '',
         phoneNumber: '',
+        avatar: ''
     });
     const [deleteStep, setDeleteStep] = useState(0);
     const [openDialog, setOpenDialog] = useState(false);
@@ -70,7 +71,6 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
                     }
                 });
                 const data = response.data;
-                console.table(data);
                 setUserInfo(data);
                 setValues({
                     email: data.email,
@@ -80,7 +80,6 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
                     phoneNumber: data.phoneNumber,
                     avatar: data.avatar
                 });
-                console.table(values);
             } catch (error) {
                 console.error('Error fetching user info:', error);
                 navigate('/user/login'); // Redirect to login if fetching user info fails
@@ -107,7 +106,6 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
 
     const handleSave = async () => {
         const sessionToken = localStorage.getItem('sessionToken');
-        console.table(values); // Log the values being sent in the PUT request
         try {
             await axios.put(userUpdateEndpoint, values, {
                 headers: {
@@ -126,12 +124,14 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
     };
 
     const handlePasswordSave = async () => {
+        if (passwordValues.newPassword.length < 8) {
+            setPasswordError('New password must be at least 8 characters');
+            return;
+        }
         if (passwordValues.newPassword !== passwordValues.confirmNewPassword) {
             setPasswordError('New passwords do not match');
             return;
         }
-
-        console.table(passwordValues); // Log the password values
 
         try {
             const authResponse = await axios.post(authEndpoint, {
@@ -139,16 +139,9 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
                 password: passwordValues.currentPassword
             });
 
-            console.table({
-                username: userInfo.username,
-                currentPassword: passwordValues.currentPassword,
-                authResponseStatus: authResponse.status
-            }); // Log the authentication request and response status
-
             if (authResponse.status === 200) {
                 const sessionToken = localStorage.getItem('sessionToken');
                 const updateData = { ...values, password: passwordValues.newPassword };
-                console.table(updateData); // Log the data being sent in the PUT request
 
                 await axios.put(userUpdateEndpoint, updateData, {
                     headers: {
@@ -168,7 +161,6 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
             setPasswordError('Current password is incorrect');
         }
     };
-
     const handleDeleteAccount = async () => {
         const sessionToken = localStorage.getItem('sessionToken');
         try {
@@ -222,6 +214,18 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
 
     const handleTabChange = (event, newValue) => {
         setTabIndex(newValue);
+    };
+
+    const handleUploadPhoto = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setValues({
+                ...values,
+                avatar: reader.result.split(',')[1] // Remove the base64 prefix
+            });
+        };
+        reader.readAsDataURL(file);
     };
 
     return (
@@ -373,8 +377,9 @@ const AccountSettingsForm = ({ userInfoEndpoint, userUpdateEndpoint, userDeleteE
                                 src={`data:image/png;base64,${values.avatar}`}
                                 sx={{ width: 100, height: 100, mb: 2 }}
                             />
-                            <Button variant="contained" color="primary" startIcon={<PhotoCamera />}>
+                            <Button variant="contained" color="primary" startIcon={<PhotoCamera />} component="label">
                                 Change Profile Photo
+                                <input type="file" accept="image/*" hidden onChange={handleUploadPhoto} />
                             </Button>
                         </Box>
                     </Grid>

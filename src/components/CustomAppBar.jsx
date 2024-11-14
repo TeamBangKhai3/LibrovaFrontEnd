@@ -48,6 +48,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingRoute }) => {
     const settings = ['Account', 'Ebook Manager', 'Logout'];
     const navigate = useNavigate();
+    const [avatar, setAvatar] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [username, setUsername] = useState('');
 
@@ -61,6 +62,7 @@ const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingR
                 });
                 if (response.status === 200) {
                     setUsername(response.data.username);
+                    setAvatar(response.data.avatar);
                 } else {
                     navigate(loginRoute);
                 }
@@ -123,7 +125,7 @@ const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingR
                                 <Typography sx={{ marginRight: '10px' }}>
                                     Hello, {username}
                                 </Typography>
-                                <Avatar />
+                                <Avatar src={`data:image/png;base64,${avatar}`} />
                             </ButtonBase>
                             <Menu
                                 sx={{ mt: '45px' }}

@@ -29,6 +29,7 @@ export default function EditBook() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: '',
+        description: '',
         author: '',
         genre: '',
         price: '',
@@ -142,7 +143,7 @@ export default function EditBook() {
             <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <CustomBreadcrumbs links={breadcrumbLinks} current="Edit Book" sx={{ marginLeft: '4%' }} disabledLinks={['Publisher']} />
             </Box>
-            <Box component="section" sx={{marginTop:'5svh',width:'80svw',height:'65svh',bgcolor:'#D9D9D9', borderRadius:'20px'}}>
+            <Box component="section" sx={{marginTop:'5svh',width:'80svw',height:'70svh',bgcolor:'#D9D9D9', borderRadius:'20px'}}>
                 <Grid container spacing={1}>
                     <Grid size={8}>
                         <Stack rowGap={0.3} spacing={2} sx={{ marginX: '10%', marginTop: '5%'}}>
@@ -150,6 +151,14 @@ export default function EditBook() {
                                 label="Book Title"
                                 name="title"
                                 value={formData.title}
+                                onChange={handleChange}
+                                variant="outlined"
+                                fullWidth
+                            />
+                            <TextField
+                                label="Description"
+                                name="description"
+                                value={formData.description}
                                 onChange={handleChange}
                                 variant="outlined"
                                 fullWidth

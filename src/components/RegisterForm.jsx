@@ -14,6 +14,8 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
         confirmPassword: '',
         email: '',
         address: '',
+        phoneNumber: '',
+        name: '',
     });
 
     const [errors, setErrors] = useState({});
@@ -34,8 +36,11 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
         if (!formData.email) newErrors.email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
         if (!formData.password) newErrors.password = 'Password is required';
+        else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
         if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
         if (!formData.address) newErrors.address = 'Address is required';
+        if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone Number is required';
+        if (!formData.name) newErrors.name = 'Name is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -50,6 +55,8 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                 password: formData.password,
                 email: formData.email,
                 address: formData.address,
+                phoneNumber: formData.phoneNumber,
+                name: formData.name,
             });
             console.log('Registration successful:', response.data);
             localStorage.setItem('sessionToken', response.data); // Store the session token
@@ -113,17 +120,18 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                     <Typography variant="h4" color="black" fontWeight={"bold"}>{title}</Typography>
                 </Box>
                 <Box component={"form"} onSubmit={handleSubmit} display="flex" flexDirection="column" width="100%">
+
                     <TextField
-                        id="username"
-                        label="Username"
+                        id="name"
+                        label="Name"
                         variant="outlined"
                         fullWidth
                         margin="dense"
                         required
-                        value={formData.username}
+                        value={formData.name}
                         onChange={handleChange}
-                        error={!!errors.username}
-                        helperText={errors.username}
+                        error={!!errors.name}
+                        helperText={errors.name}
                         InputProps={{ style: { backgroundColor: 'white' } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -144,39 +152,40 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                                 color: 'black',
                             },
                         }}
-                    />
-                    <TextField
-                        id="email"
-                        label="Email Address"
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        error={!!errors.email}
-                        helperText={errors.email}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
+                    />                    <TextField
+                    id="username"
+                    label="Username"
+                    variant="outlined"
+                    fullWidth
+                    margin="dense"
+                    required
+                    value={formData.username}
+                    onChange={handleChange}
+                    error={!!errors.username}
+                    helperText={errors.username}
+                    InputProps={{ style: { backgroundColor: 'white' } }}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                                borderColor: 'black',
                             },
-                            '& .MuiInputLabel-root.Mui-focused': {
+                            '&:hover fieldset': {
+                                borderColor: 'black',
+                            },
+                            '&.Mui-focused fieldset': {
+                                borderColor: 'black',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-input': {
                                 color: 'black',
                             },
-                        }}
-                    />
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                            color: 'black',
+                        },
+                    }}
+                />
+
+
                     <TextField
                         id="password"
                         label="Password"
@@ -249,6 +258,70 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                                 </InputAdornment>
                             ),
                         }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'black',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'black',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'black',
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-input': {
+                                    color: 'black',
+                                },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                                color: 'black',
+                            },
+                        }}
+                    />
+                    <TextField
+                        id="email"
+                        label="Email Address"
+                        variant="outlined"
+                        fullWidth
+                        margin="dense"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        error={!!errors.email}
+                        helperText={errors.email}
+                        InputProps={{ style: { backgroundColor: 'white' } }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'black',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'black',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'black',
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-input': {
+                                    color: 'black',
+                                },
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                                color: 'black',
+                            },
+                        }}
+                    />
+                    <TextField
+                        id="phoneNumber"
+                        label="Phone Number"
+                        variant="outlined"
+                        fullWidth
+                        margin="dense"
+                        required
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        error={!!errors.phoneNumber}
+                        helperText={errors.phoneNumber}
+                        InputProps={{ style: { backgroundColor: 'white' } }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': {
