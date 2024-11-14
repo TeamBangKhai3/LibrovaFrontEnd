@@ -22,6 +22,7 @@ createRoot(document.getElementById('root')).render(
     <StrictMode>
         <BrowserRouter>
             <Routes>
+                {/*Testing the new Branch*/}
                 <Route path="/" element={<Navigate to="/user/login" />} />
                 <Route path="/user/login" element={<UsrLogin/>} />
                 <Route path="/user/register" element={<UsrRegister/>} />
