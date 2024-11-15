@@ -2,17 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import CustomAppBar from '../components/CustomAppBar.jsx';
-import {
-    Box,
-    Button,
-    Typography,
-    Backdrop,
-    CircularProgress,
-    Paper
-} from '@mui/material';
+import { Box, Typography, Backdrop, CircularProgress, Paper } from '@mui/material';
 import CustomBreadcrumbs from '../components/CustomBreadcrumbs.jsx';
 import Grid from '@mui/material/Grid2';
 import { Rating } from "@mui/lab";
+import { Button } from "@/components/ui/button"
 import './UserProductView.css'; // Import the CSS file
 
 export default function UserProductView() {
@@ -55,7 +49,7 @@ export default function UserProductView() {
 
         const fetchAverageRating = async () => {
             try {
-                const response = await axios.get(`http://192.168.193.106:25566/reviews/getaveragerating/${id}`);
+                const response = await axios.get(`${backendUrl}/reviews/getaveragerating/${id}`);
                 setAverageRating(response.data);
             } catch (error) {
                 console.error('Error fetching average rating:', error);
@@ -64,7 +58,7 @@ export default function UserProductView() {
 
         const fetchReviews = async () => {
             try {
-                const response = await axios.get(`http://192.168.193.106:25566/reviews/getallreviews/${id}`);
+                const response = await axios.get(`${backendUrl}/reviews/getallreviews/${id}`);
                 setReviews(response.data);
             } catch (error) {
                 console.error('Error fetching reviews:', error);
@@ -77,78 +71,55 @@ export default function UserProductView() {
     }, [id, backendUrl]);
 
     return (
-        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden' }}>
+        <div className="flex flex-col items-center h-screen overflow-x-hidden">
             <CustomAppBar
                 userInfoEndpoint={`${backendUrl}/users/getuserinfo`}
                 loginRoute="/user/login"
                 homeRoute="/user/home"
                 accountSettingRoute="/user/accountsetting"
             />
-            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <CustomBreadcrumbs links={breadcrumbLinks} current={title} sx={{ marginLeft: '5%' }} disabledLinks={['User']} />
-            </Box>
-            <Box component="section" className="scrollable-content" sx={{ width: '85%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className="pl-32 mt-4 w-full flex flex-col items-start">
+                <CustomBreadcrumbs links={breadcrumbLinks} current={title} className="ml-5" disabledLinks={['User']} />
+            </div>
+            <div className="scrollable-content w-4/5 flex flex-col items-center">
                 {book && book.cover ? (
-                    <Grid container spacing={1} sx={{ width: '90%', marginTop: '20px', flexWrap: 'nowrap' }}>
-                        <Grid size={4} sx={{ width: '35%', p: '3%' }}>
-                            <Box component="section" sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <img src={`data:image/png;base64,${book.cover}`} alt={book.title} style={{ width: 'auto', height: '450px'}} />
-                            </Box>
-                        </Grid>
-                        <Grid size={8} sx={{ padding: '20px' }}>
-                            <Box component="section" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: '1%' }}>
-                                    {book.title}
-                                </Typography>
-                                <Typography variant="subtitle1" sx={{ marginBottom: '5%' }}>
-                                    Author: {book.author}<br/>
-                                    Genre: {book.genre}
-                                </Typography>
-                                <Typography variant="body1" sx={{marginBottom: '1%'}}>
-                                    {book.description}
-                                    <br/><br/>
-                                </Typography>
-                                <Typography variant="h6" sx={{ marginBottom: '1%' }}>
-                                    Ratings: <Rating value={averageRating} readOnly />
-                                </Typography>
-                                <Typography variant="h6" sx={{marginBottom: '7%'}}>
-                                    Price: <b>₱{book.price}</b><br/>
-                                    ISBN: <b>{book.isbn}</b>
-                                </Typography>
-
-                                <Button variant="contained" color="primary" sx={{ width: '100%', marginTop: '20px' }} onClick={() => handleAddToCart(book.eBookID)}>
-                                    Add to Cart
-                                </Button>
-                                <Button variant="contained" color="secondary" sx={{ width: '100%', marginTop: '20px' }} onClick={() => handleBuyNow(book.eBookID)}>
-                                    Buy Now
-                                </Button>
-                            </Box>
-                        </Grid>
-                    </Grid>
+                    <div className="flex w-19/12 mt-5">
+                        <div className="w-1/3 p-1 flex flex-col items-center">
+                            <img src={`data:image/png;base64,${book.cover}`} alt={book.title} className="h-96"/>
+                        </div>
+                        <div className="w-2/3 p-5 flex flex-col items-start">
+                            <h1 className="text-2xl font-bold mb-2">{book.title}</h1>
+                            <h2 className="text-lg mb-5">Author: {book.author}<br/>Genre: {book.genre}</h2>
+                            <p className="mb-2">{book.description}</p>
+                            <h3 className="text-xl mb-2">Ratings: <Rating value={averageRating} readOnly/>
+                                <b>({averageRating})</b></h3>
+                            <h3 className="text-xl mb-7">Price: <b>₱{book.price}</b><br/>ISBN: <b>{book.isbn}</b></h3>
+                            <Button className="w-full mt-5 bg-gray-200 text-black"
+                                    onClick={() => handleAddToCart(book.eBookID)}>Add to Cart</Button>
+                            <Button className="w-full mt-5 bg-black text-white"
+                                    onClick={() => handleBuyNow(book.eBookID)}>Buy Now</Button>
+                        </div>
+                    </div>
                 ) : (
-                    <Typography variant="h6" sx={{ marginTop: '20px' }}>Loading...</Typography>
+                    <h2 className="mt-5">Loading...</h2>
                 )}
-                <Box component={"section"} width={"100%"} height={"30vh"}>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold', marginTop: '20px', marginBottom: '50px' }}>
-                        Reviews
-                    </Typography>
+                <div className="w-full h-1/3">
+                    <h1 className=" text-2xl font-bold mt-5 mb-12">Reviews</h1>
                     {reviews.map((review) => (
-                        <Box key={review.reviewID} sx={{ marginBottom: '20px', width: '100%' }}>
-                            <Paper elevation={3} sx={{ padding: '20px' }}>
-                                <Typography variant="body1"><b>{review.user.name || 'Anonymous'}</b></Typography>
+                        <div key={review.reviewID} className="mx-16 mb-5 w-full">
+                            <div className="p-5 shadow-md">
+                                <h3 className="font-bold">{review.user.name || 'Anonymous'}</h3>
                                 <Rating value={review.rating} readOnly />
-                                <Typography variant="body1">{review.reviewText}</Typography>
-                                <Typography variant="body2" color="textSecondary">{new Date(review.date).toLocaleDateString()}</Typography>
-                            </Paper>
-                        </Box>
+                                <p>{review.reviewText}</p>
+                                <p className="text-gray-500">{new Date(review.date).toLocaleDateString()}</p>
+                            </div>
+                        </div>
                     ))}
-                </Box>
-
-            </Box>
-
-            <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={deleting}>
+                </div>
+            </div>
+            <Backdrop className="text-white z-50" open={deleting}>
                 <CircularProgress color="inherit" />
             </Backdrop>
-        </Box>
+        </div>
     );
 }

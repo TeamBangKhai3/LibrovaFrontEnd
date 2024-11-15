@@ -62,6 +62,7 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
 
     const onSubmit = async (data) => {
         try {
+            console.table(data)
             const response = await axios.post(authEndpoint, data);
             if (response.status === 200 && response.data) {
                 localStorage.setItem('sessionToken', response.data);
