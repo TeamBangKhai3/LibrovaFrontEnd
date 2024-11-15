@@ -1,26 +1,29 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Typography, Card, CardContent, CardMedia, IconButton } from '@mui/material';
-import { ArrowBack, ArrowForward } from '@mui/icons-material';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const BookCarousel = ({ sx }) => {
+const BookCarousel = ({ className = '' }) => {
     const [books, setBooks] = useState([]);
     const [visibleBooks, setVisibleBooks] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [booksPerRow, setBooksPerRow] = useState(3);
     const [loading, setLoading] = useState(true);
     const resizeTimeout = useRef(null);
+    const containerRef = useRef(null);
+    const navigate = useNavigate();
+
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const getallebooks = `${backendUrl}/ebook/getallebooks`;
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchBooks = async () => {
             try {
                 const response = await axios.get(getallebooks);
                 setBooks(response.data);
-                setVisibleBooks(response.data.slice(0, booksPerRow - 1));
+                setVisibleBooks(response.data.slice(0, booksPerRow));
             } catch (error) {
                 console.error('Error fetching books:', error);
             } finally {
@@ -35,12 +38,14 @@ const BookCarousel = ({ sx }) => {
             clearTimeout(resizeTimeout.current);
         }
         resizeTimeout.current = setTimeout(() => {
-            const containerWidth = document.querySelector('.book-carousel-container').offsetWidth;
-            const bookWidth = 200; // Width of each book card
-            const newBooksPerRow = Math.floor(containerWidth / (bookWidth + 20)); // 20px is the gap between books
-            setBooksPerRow(newBooksPerRow);
-            setVisibleBooks(books.slice(currentIndex, currentIndex + newBooksPerRow - 1));
-        }, 300); // Adjust the debounce delay as needed
+            if (containerRef.current) {
+                const containerWidth = containerRef.current.offsetWidth;
+                const bookWidth = 200; // Width of each book card
+                const newBooksPerRow = Math.floor(containerWidth / (bookWidth + 20)); // 20px is the gap between books
+                setBooksPerRow(newBooksPerRow);
+                setVisibleBooks(books.slice(currentIndex, currentIndex + newBooksPerRow));
+            }
+        }, 300);
     };
 
     useEffect(() => {
@@ -53,15 +58,15 @@ const BookCarousel = ({ sx }) => {
     }, [books, currentIndex]);
 
     const handleNext = () => {
-        const nextIndex = currentIndex + booksPerRow - 1;
+        const nextIndex = currentIndex + booksPerRow;
         setCurrentIndex(nextIndex);
-        setVisibleBooks(books.slice(nextIndex, nextIndex + booksPerRow - 1));
+        setVisibleBooks(books.slice(nextIndex, nextIndex + booksPerRow));
     };
 
     const handlePrevious = () => {
-        const prevIndex = Math.max(currentIndex - (booksPerRow - 1), 0);
+        const prevIndex = Math.max(currentIndex - booksPerRow, 0);
         setCurrentIndex(prevIndex);
-        setVisibleBooks(books.slice(prevIndex, prevIndex + booksPerRow - 1));
+        setVisibleBooks(books.slice(prevIndex, prevIndex + booksPerRow));
     };
 
     const handleBookClick = (id) => {
@@ -73,46 +78,49 @@ const BookCarousel = ({ sx }) => {
     }
 
     return (
-        <Box className="book-carousel-container" sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '95%', whiteSpace: 'nowrap', overflowX: 'hidden', ...sx }}>
-            <Box sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'hidden', width: '100%', justifyContent: 'center' }}>
+        <div ref={containerRef} className={`relative flex flex-col items-center w-full overflow-hidden ${className}`}>
+            <div className="flex flex-nowrap justify-center w-full">
                 {visibleBooks.map((book) => (
-                    <Box key={book.eBookID} sx={{ margin: '10px' }} onClick={() => handleBookClick(book.eBookID)}>
-                        <Card sx={{ width: 200, height: 450, border: '1px solid #ccc', boxShadow: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer' }}>
-                            <CardMedia
-                                component="img"
-                                image={`data:image/png;base64,${book.cover}`}
-                                alt={book.title}
-                                sx={{ width: 'auto', height: 250, padding: '10px' }}
-                            />
-                            <CardContent sx={{ textAlign: 'center' }}>
-                                <Typography variant="subtitle1" sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                                    {book.title}
-                                </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                                    {book.author}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Box>
+                    <Card
+                        key={book.eBookID}
+                        className="w-[200px] h-[450px] m-2 cursor-pointer transition-all duration-300 hover:shadow-lg"
+                        onClick={() => handleBookClick(book.eBookID)}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center">
+                            <div className="relative w-full h-[250px] mb-4">
+                                <img
+                                    src={`data:image/png;base64,${book.cover}`}
+                                    alt={book.title}
+                                    className="w-full h-full object-contain"
+                                />
+                            </div>
+                            <h3 className="text-lg font-semibold text-center line-clamp-2">{book.title}</h3>
+                            <p className="text-sm text-muted-foreground text-center mt-2">{book.author}</p>
+                        </CardContent>
+                    </Card>
                 ))}
-            </Box>
+            </div>
             {currentIndex > 0 && (
-                <IconButton
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute left-2 top-1/2 -translate-y-1/2"
                     onClick={handlePrevious}
-                    sx={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)' }}
                 >
-                    <ArrowBack />
-                </IconButton>
+                    <ChevronLeft className="h-4 w-4" />
+                </Button>
             )}
-            {currentIndex + booksPerRow - 1 < books.length && (
-                <IconButton
+            {currentIndex + booksPerRow < books.length && (
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
                     onClick={handleNext}
-                    sx={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}
                 >
-                    <ArrowForward />
-                </IconButton>
+                    <ChevronRight className="h-4 w-4" />
+                </Button>
             )}
-        </Box>
+        </div>
     );
 };
 

@@ -13,7 +13,7 @@ const PublisherLogin = () => {
             registerRoute="/publisher/register"
             forgotPasswordRoute="/publisher/forgotpassword"
             title="Publisher Login"
-            alternativeTitle="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Are you a User?"
+            alternativeTitle="Are you a User?"
             alternativeRoute="/user/login"
         />
     );

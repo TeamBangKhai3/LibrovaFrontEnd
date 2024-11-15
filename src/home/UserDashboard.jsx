@@ -23,6 +23,9 @@ export default function UserDashboard() {
                 homeRoute="/user/home"
                 accountSettingRoute="/user/accountsetting"
             />
+            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <CustomBreadcrumbs links={breadcrumbLinks} current="Home" sx={{ marginLeft: '5%' }} disabledLinks={['Publisher']} />
+            </Box>
             <Box component="section" sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Box component="section" sx={{ marginLeft: '8svw', marginTop: '16px' ,display:'flex'}}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>

@@ -1,56 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { AppBar, Box, Container, Toolbar, IconButton, Typography, Avatar, Menu, MenuItem, ButtonBase, Button, InputBase } from '@mui/material';
-import { ShoppingCartOutlined, BookmarkBorderOutlined, LibraryBooksOutlined, Search as SearchIcon } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import logotrans from '../assets/logotrans.png';
+'use client'
 
-const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #D3D3D3',
-    '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: '55svw',
-    height: '45px',
-    display: 'flex',
-    alignItems: 'center',
-    color: 'black',
-}));
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { Search, ShoppingCart, Bookmark, Library, User } from 'lucide-react'
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'black',
-}));
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import logotrans from '../assets/logotrans.png'
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-        padding: theme.spacing(1, 1, 1, 0),
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        height: '100%',
-    },
-}));
-
-const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingRoute }) => {
-    const settings = ['Account', 'Ebook Manager', 'Logout'];
-    const navigate = useNavigate();
-    const [avatar, setAvatar] = useState(null);
-    const [anchorElUser, setAnchorElUser] = useState(null);
-    const [username, setUsername] = useState('');
+export default function CustomAppBar({
+                                         userInfoEndpoint,
+                                         loginRoute,
+                                         homeRoute,
+                                         accountSettingRoute
+                                     }) {
+    const navigate = useNavigate()
+    const [avatar, setAvatar] = useState(null)
+    const [username, setUsername] = useState('')
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -59,125 +35,85 @@ const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingR
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('sessionToken')}`
                     }
-                });
+                })
                 if (response.status === 200) {
-                    setUsername(response.data.username);
-                    setAvatar(response.data.avatar);
+                    setUsername(response.data.username)
+                    setAvatar(response.data.avatar)
                 } else {
-                    navigate(loginRoute);
+                    navigate(loginRoute)
                 }
             } catch (error) {
-                console.error('Error fetching user info:', error);
-                navigate(loginRoute);
+                console.error('Error fetching user info:', error)
+                navigate(loginRoute)
             }
-        };
+        }
 
-        fetchUserInfo();
-    }, [navigate, userInfoEndpoint, loginRoute]);
-
-    const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
-    };
-
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };
+        fetchUserInfo()
+    }, [navigate, userInfoEndpoint, loginRoute])
 
     const handleLogout = () => {
-        localStorage.removeItem('sessionToken');
-        navigate(loginRoute);
-    };
-
-    const handleAccount = () => {
-        navigate(accountSettingRoute);
-    };
+        localStorage.removeItem('sessionToken')
+        navigate(loginRoute)
+    }
 
     return (
-        <>
-            <AppBar position="sticky" sx={{ height: '80px', bgcolor: 'white', boxShadow: 'none',width:'100svw' }}>
-                <Container maxWidth="x1" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <Toolbar disableGutters sx={{ width: '100%' }}>
-                        <ButtonBase onClick={() => navigate(homeRoute)}>
-                            <Box component="img" src={logotrans} alt="Logo" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '60px', marginLeft: '20px', marginRight: '5svw' }} />
-                        </ButtonBase>
-                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, alignItems: 'center', Width: '68svw', marginRight: '5svw' }}>
-                            <Search>
-                                <SearchIconWrapper>
-                                    <SearchIcon />
-                                </SearchIconWrapper>
-                                <StyledInputBase
-                                    placeholder="Search…"
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                            </Search>
-                        </Box>
-                        <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-                            <IconButton sx={{ color: 'black', fontSize: '33px' }}>
-                                <ShoppingCartOutlined sx={{ fontSize: 'inherit' }} />
-                            </IconButton>
-                            <IconButton sx={{ color: 'black', fontSize: '33px' }}>
-                                <BookmarkBorderOutlined sx={{ fontSize: 'inherit' }} />
-                            </IconButton>
-                            <IconButton sx={{ color: 'black', fontSize: '33px', marginRight: '10px' }}>
-                                <LibraryBooksOutlined sx={{ fontSize: 'inherit' }} />
-                            </IconButton>
-                            <ButtonBase sx={{ display: 'flex', alignItems: 'center', color: 'black', marginRight: '10px' }} onClick={handleOpenUserMenu}>
-                                <Typography sx={{ marginRight: '10px' }}>
-                                    Hello, {username}
-                                </Typography>
-                                <Avatar src={`data:image/png;base64,${avatar}`} />
-                            </ButtonBase>
-                            <Menu
-                                sx={{ mt: '45px' }}
-                                id="menu-appbar"
-                                anchorEl={anchorElUser}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={Boolean(anchorElUser)}
-                                onClose={handleCloseUserMenu}
-                            >
-                                {settings.map((setting) => (
-                                    <MenuItem
-                                        key={setting}
-                                        onClick={() => {
-                                            handleCloseUserMenu();
-                                            if (setting === 'Logout') handleLogout();
-                                            if (setting === 'Account') handleAccount();
-                                        }}
-                                    >
-                                        <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
-                                    </MenuItem>
-                                ))}
-                            </Menu>
-                        </Box>
-                    </Toolbar>
-                </Container>
-            </AppBar>
-            <AppBar position="sticky" sx={{ height: '50px', bgcolor: '#E0E0E0', top: '80px', width: '100svw', boxShadow: 1 }}>
-                <Container maxWidth="xl" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <Toolbar disableGutters sx={{ width: '100%', justifyContent: 'space-around' }}>
-                        <Button
-                            color="inherit"
-                            sx={{ color: 'black', fontWeight: 'bold' }}
-                            onClick={() => navigate(homeRoute)}
-                        >
-                            Home
-                        </Button>
-                        <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>Books</Button>
-                        <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>Genre</Button>
-                        <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>???</Button>
-                    </Toolbar>
-                </Container>
-            </AppBar>
-        </>
-    );
-};
+        <div className="sticky top-0 z-50 w-screen">
+            <header className="flex h-20 items-center justify-between bg-white px-4 shadow-sm">
+                <Button variant="ghost" className="p-8 bg-transparent" onClick={() => navigate(homeRoute)}>
+                    <img src={logotrans} alt="Logo" width={60} height={60} />
+                </Button>
 
-export default CustomAppBar;
+                <div className="flex-grow mx-4">
+                    <div className="relative">
+                        <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500" />
+                        <Input
+                            type="search"
+                            placeholder="Search…"
+                            className="w-full pl-8 h-[45px]"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                    <Button variant="ghost" size="icon">
+                        <ShoppingCart className="h-6 w-6" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                        <Bookmark className="h-6 w-6" />
+                    </Button>
+                    <Button variant="ghost" size="icon">
+                        <Library className="h-6 w-6" />
+                    </Button>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="flex items-center space-x-2 p-7 bg-transparent">
+                                <span>Hello, {username}</span>
+                                <Avatar>
+                                    <AvatarImage src={`data:image/png;base64,${avatar}`} />
+                                    <AvatarFallback><User /></AvatarFallback>
+                                </Avatar>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => navigate(accountSettingRoute)}>
+                                Account Settings
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Ebook Manager</DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </header>
+
+            <nav className="flex h-[50px] items-center justify-center bg-gray-200 shadow-sm space-x-64">
+                <Button variant="ghost" className="bg-transparent px-10" onClick={() => navigate(homeRoute)}>Home</Button>
+                <Button variant="ghost" className="bg-transparent px-10" >Books</Button>
+                <Button variant="ghost" className="bg-transparent px-10">Genre</Button>
+                <Button variant="ghost"className="bg-transparent px-10">More</Button>
+            </nav>
+        </div>
+    )
+}
