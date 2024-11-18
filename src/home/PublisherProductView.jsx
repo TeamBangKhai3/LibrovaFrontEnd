@@ -20,6 +20,7 @@ export default function PublisherProductView() {
     const [deleting, setDeleting] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const navigate = useNavigate();
+    const nothing = "No description available please contact the publisher for more information. Thank you! :)";
 
     const breadcrumbLinks = [
         { label: 'Publisher', path: '/publisher/home' },
@@ -107,10 +108,10 @@ export default function PublisherProductView() {
                         <div className="w-1/3 p-1 flex flex-col items-center">
                             <img src={`data:image/png;base64,${book.cover}`} alt={book.title} className="h-96" />
                         </div>
-                        <div className="w-2/3 p-5 flex flex-col items-start">
+                        <div className="mt-5 w-2/3 p-5 flex flex-col items-start">
                             <h1 className="text-2xl font-bold mb-2">{book.title}</h1>
                             <h2 className="text-lg mb-5">Author: {book.author}<br/>Genre: {book.genre}</h2>
-                            <p className="mb-2">{book.description}</p>
+                            <p className="mb-2">{book.description || nothing}</p>
                             <h3 className="text-xl mb-2">Ratings: <Rating value={averageRating} readOnly /> <b>({averageRating})</b></h3>
                             <h3 className="text-xl mb-7">Price: <b>₱{book.price}</b><br/>ISBN: <b>{book.isbn}</b></h3>
                             <Button className="w-full mt-5 bg-gray-200 text-black" onClick={() => handleBookClick(book.eBookID)}>Manage Book</Button>
