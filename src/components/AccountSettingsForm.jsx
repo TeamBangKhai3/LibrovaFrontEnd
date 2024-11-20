@@ -40,10 +40,11 @@ export default function AccountSettingsForm({
         phoneNumber: '',
         avatar: ''
     })
-    const [deleteStep, setDeleteStep] = useState(0)
     const [openDialog, setOpenDialog] = useState(false)
     const [showUpdateAlert, setShowUpdateAlert] = useState(false)
     const [showDeleteAlert, setShowDeleteAlert] = useState(false)
+    const [updateAlertType, setUpdateAlertType] = useState('success')
+    const [updateAlertMessage, setUpdateAlertMessage] = useState('')
     const [passwordValues, setPasswordValues] = useState({
         currentPassword: '',
         newPassword: '',
@@ -63,7 +64,6 @@ export default function AccountSettingsForm({
                 })
                 const data = response.data
                 setUserInfo(data)
-                console.table(data)
                 setValues({
                     email: data.email,
                     name: data.name,
@@ -99,7 +99,6 @@ export default function AccountSettingsForm({
     const handleSave = async () => {
         setIsLoading(true)
         const sessionToken = localStorage.getItem('sessionToken')
-        console.table(values)
         try {
             await axios.put(userUpdateEndpoint, values, {
                 headers: {
@@ -107,13 +106,20 @@ export default function AccountSettingsForm({
                     'Authorization': `Bearer ${sessionToken}`
                 }
             })
+            setUpdateAlertType('success')
+            setUpdateAlertMessage('Your profile has been updated successfully.')
             setShowUpdateAlert(true)
             setTimeout(() => {
                 setShowUpdateAlert(false)
             }, 3000)
         } catch (error) {
             console.error('Error updating user info:', error)
-            alert('Failed to update user info. Please try again.')
+            setUpdateAlertType('error')
+            setUpdateAlertMessage('Failed to update user info. Please try again.')
+            setShowUpdateAlert(true)
+            setTimeout(() => {
+                setShowUpdateAlert(false)
+            }, 3000)
         } finally {
             setIsLoading(false)
         }
@@ -146,6 +152,8 @@ export default function AccountSettingsForm({
                         'Authorization': `Bearer ${sessionToken}`
                     }
                 })
+                setUpdateAlertType('success')
+                setUpdateAlertMessage('Your password has been updated successfully.')
                 setShowUpdateAlert(true)
                 setTimeout(() => {
                     setShowUpdateAlert(false)
@@ -177,7 +185,12 @@ export default function AccountSettingsForm({
             }, 3000)
         } catch (error) {
             console.error('Error deleting account:', error)
-            alert('Failed to delete account. Please try again.')
+            setUpdateAlertType('error')
+            setUpdateAlertMessage('Failed to delete account. Please try again.')
+            setShowUpdateAlert(true)
+            setTimeout(() => {
+                setShowUpdateAlert(false)
+            }, 3000)
         } finally {
             setIsLoading(false)
         }
@@ -185,34 +198,15 @@ export default function AccountSettingsForm({
 
     const handleDeleteClick = () => {
         setOpenDialog(true)
-        setDeleteStep(1)
     }
 
     const handleDialogClose = () => {
         setOpenDialog(false)
-        setDeleteStep(0)
     }
 
     const handleDialogConfirm = () => {
-        if (deleteStep < 3) {
-            setDeleteStep(deleteStep + 1)
-        } else {
-            handleDeleteAccount()
-            setOpenDialog(false)
-        }
-    }
-
-    const getDialogContent = () => {
-        switch (deleteStep) {
-            case 1:
-                return "Are you sure you want to delete your account?"
-            case 2:
-                return "Remember this action is irreversible and will destroy your data. Are you sure?"
-            case 3:
-                return "Are you really sure you want to do this action?"
-            default:
-                return ""
-        }
+        handleDeleteAccount()
+        setOpenDialog(false)
     }
 
     const handleUploadPhoto = (e) => {
@@ -304,7 +298,10 @@ export default function AccountSettingsForm({
                 </Tabs>
             </CardContent>
             <CardFooter className="flex justify-between">
-                <Button variant="destructive" onClick={handleDeleteClick}>Delete Account</Button>
+                <Button variant="destructive" onClick={handleDeleteClick} disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Delete Account
+                </Button>
                 <Button onClick={passwordValues.currentPassword ? handlePasswordSave : handleSave} disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {passwordValues.currentPassword ? 'Change Password' : 'Save Changes'}
@@ -315,7 +312,7 @@ export default function AccountSettingsForm({
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Account</AlertDialogTitle>
-                        <AlertDialogDescription>{getDialogContent()}</AlertDialogDescription>
+                        <AlertDialogDescription>Are you sure you want to delete your account? This action cannot be undone.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={handleDialogClose}>No</AlertDialogCancel>
@@ -325,9 +322,12 @@ export default function AccountSettingsForm({
             </AlertDialog>
 
             {showUpdateAlert && (
-                <Alert className="fixed bottom-4 right-4 w-auto">
-                    <AlertTitle>Success</AlertTitle>
-                    <AlertDescription>Your profile has been updated successfully.</AlertDescription>
+                <Alert
+                    className="fixed bottom-4 right-4 w-auto"
+                    variant={updateAlertType === 'error' ? 'destructive' : 'default'}
+                >
+                    <AlertTitle>{updateAlertType === 'success' ? 'Success' : 'Error'}</AlertTitle>
+                    <AlertDescription>{updateAlertMessage}</AlertDescription>
                 </Alert>
             )}
 
