@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AccountSettingsForm from '../components/AccountSettingsForm';
 import CustomAppBar from '../components/CustomAppBar';
-import {Box} from "@mui/material";
+import { Box } from "@mui/material";
 
 export default function PublisherAccountSetting() {
     document.title = "Account Settings | Librova";
@@ -19,22 +19,38 @@ export default function PublisherAccountSetting() {
     ];
 
     return (
-        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box sx={{ 
+            height: '100svh',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+        }}>
             <CustomAppBar
                 userInfoEndpoint={userinfoEndpoint}
                 loginRoute="/publisher/login"
                 homeRoute="/publisher/home"
                 accountSettingRoute="/publisher/accountsetting"
+                userType={2}
             />
-            <AccountSettingsForm
-                userInfoEndpoint={userinfoEndpoint}
-                userUpdateEndpoint={userupdateEndpoint}
-                userDeleteEndpoint={userdeleteEndpoint}
-                authEndpoint={authEndpoint}
-                navigate={navigate}
-                breadcrumbLinks={breadcrumbLinks}
-                title="Account Information (Publisher)"
-            />
+            <Box sx={{ 
+                flex: 1,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                overflowY: 'auto',
+                padding: 3
+            }}>
+                <AccountSettingsForm
+                    userInfoEndpoint={userinfoEndpoint}
+                    userUpdateEndpoint={userupdateEndpoint}
+                    userDeleteEndpoint={userdeleteEndpoint}
+                    authEndpoint={authEndpoint}
+                    navigate={navigate}
+                    breadcrumbLinks={breadcrumbLinks}
+                    title="Account Information (Publisher)"
+                />
+            </Box>
         </Box>
     );
 }

@@ -33,7 +33,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/publisher/register" element={<PublisherRegister/>} />
                 <Route path="/publisher/home" element={<PublisherDashboard/>} />
                 <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
-                <Route path="/publisher/addbook" element={<PublisherAddBook/>} />
+                <Route path="/publisher/addebook" element={<PublisherAddBook/>} />
                 <Route path="publisher/home/ebookinfo/:id" element={<PublisherProductView/>} />
                 <Route path="publisher/home/ebookinfo/editinfo/:id" element={<EditBook/>} />
             </Routes>

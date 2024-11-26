@@ -98,6 +98,7 @@ export default function PublisherProductView() {
                 loginRoute="/publisher/login"
                 homeRoute="/publisher/home"
                 accountSettingRoute="/publisher/accountsetting"
+                userType={2}
             />
             <div className="pl-32 mt-4 w-full flex flex-col items-start">
                 <CustomBreadcrumbs links={breadcrumbLinks} current={title} className="ml-5" disabledLinks={['Publisher']} />

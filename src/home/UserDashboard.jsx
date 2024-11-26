@@ -16,23 +16,43 @@ export default function UserDashboard() {
     ];
 
     return (
-        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden' }}>
+        <Box sx={{ 
+            height: '100svh',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+        }}>
             <CustomAppBar
                 userInfoEndpoint={`${backendUrl}/users/getuserinfo`}
                 loginRoute="/user/login"
                 homeRoute="/user/home"
                 accountSettingRoute="/user/accountsetting"
+                userType={1}
             />
-            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <CustomBreadcrumbs links={breadcrumbLinks} current="Home" sx={{ marginLeft: '5%' }} disabledLinks={['Publisher']} />
-            </Box>
-            <Box component="section" sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <Box component="section" sx={{ marginLeft: '8svw', marginTop: '16px' ,display:'flex'}}>
+            
+            <Box sx={{ 
+                flex: 1,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                overflowY: 'auto',
+                pt: 2
+            }}>
+                <CustomBreadcrumbs 
+                    links={breadcrumbLinks} 
+                    current="Home" 
+                    sx={{ px: 3 }}
+                    disabledLinks={['Publisher']} 
+                />
+                
+                <Box sx={{ px: 3, py: 2 }}>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                         Books to Read
                     </Typography>
                 </Box>
-                <Box component="section" sx={{ marginTop: '20px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowX: 'hidden'}}>
+
+                <Box sx={{ width: '100%' }}>
                     <BookCarousel />
                 </Box>
             </Box>

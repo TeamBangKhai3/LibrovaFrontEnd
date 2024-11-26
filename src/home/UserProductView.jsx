@@ -78,6 +78,7 @@ export default function UserProductView() {
                 loginRoute="/user/login"
                 homeRoute="/user/home"
                 accountSettingRoute="/user/accountsetting"
+                userType={1}
             />
             <div className="pl-32 mt-4 w-full flex flex-col items-start">
                 <CustomBreadcrumbs links={breadcrumbLinks} current={title} className="ml-5" disabledLinks={['User']} />

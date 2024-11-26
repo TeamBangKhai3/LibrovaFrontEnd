@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AlertCircle, Camera, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -21,6 +23,28 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+
+const formVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+}
+
+const inputVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: i => ({
+        opacity: 1,
+        x: 0,
+        transition: {
+            delay: i * 0.1
+        }
+    })
+}
+
+const alertVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 50 }
+}
 
 export default function AccountSettingsForm({
                                                 userInfoEndpoint = '/api/user',
@@ -52,6 +76,7 @@ export default function AccountSettingsForm({
     })
     const [passwordError, setPasswordError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -72,6 +97,7 @@ export default function AccountSettingsForm({
                     phoneNumber: data.phoneNumber,
                     avatar: data.avatar
                 })
+                setLoading(false)
             } catch (error) {
                 console.error('Error fetching user info:', error)
                 navigate('/user/login')
@@ -221,92 +247,170 @@ export default function AccountSettingsForm({
         reader.readAsDataURL(file)
     }
 
+    const LoadingSkeleton = () => (
+        <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+                <Skeleton className="w-20 h-20 rounded-full" />
+                <Skeleton className="h-10 w-32" />
+            </div>
+            <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+
+    if (loading) {
+        return (
+            <Card className="w-full max-w-6xl mx-auto mt-10">
+                <CardHeader>
+                    <Skeleton className="h-8 w-64" />
+                    <Skeleton className="h-4 w-96" />
+                </CardHeader>
+                <CardContent>
+                    <LoadingSkeleton />
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
-        <Card className="w-full max-w-4xl mt-10 overflow-x-hidden" >
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>Manage your account settings and preferences.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Tabs defaultValue="basic-info" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="basic-info">Basic Info</TabsTrigger>
-                        <TabsTrigger value="password">Password</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="basic-info">
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-4">
-                                <Avatar className="w-20 h-20">
-                                    <AvatarImage src={`data:image/png;base64,${values.avatar}`} alt="Profile Photo" />
-                                    <AvatarFallback>{values.name?.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <Button variant="contained" size="sm">
-                                    <label className="flex items-center cursor-pointer">
-                                        <Camera className="mr-2 h-4 w-4" />
-                                        Change Photo
-                                        <input type="file" accept="image/*" hidden onChange={handleUploadPhoto} />
-                                    </label>
-                                </Button>
-                            </div>
-                            <div className="grid gap-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="username">Username</Label>
-                                    <Input id="username" value={userInfo.username} readOnly disabled />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
-                                    <Input id="name" name="name" value={values.name} onChange={handleInputChange} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" name="email" type="email" value={values.email} onChange={handleInputChange} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="address">Address</Label>
-                                    <Input id="address" name="address" value={values.address} onChange={handleInputChange} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="phoneNumber">Phone Number</Label>
-                                    <Input id="phoneNumber" name="phoneNumber" value={values.phoneNumber} onChange={handleInputChange} />
-                                </div>
-                            </div>
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="password">
-                        <div className="space-y-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="currentPassword">Current Password</Label>
-                                <Input id="currentPassword" name="currentPassword" type="password" value={passwordValues.currentPassword} onChange={handlePasswordChange} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="newPassword">New Password</Label>
-                                <Input id="newPassword" name="newPassword" type="password" value={passwordValues.newPassword} onChange={handlePasswordChange} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
-                                <Input id="confirmNewPassword" name="confirmNewPassword" type="password" value={passwordValues.confirmNewPassword} onChange={handlePasswordChange} />
-                            </div>
-                            {passwordError && (
-                                <Alert variant="destructive">
-                                    <AlertCircle className="h-4 w-4" />
-                                    <AlertTitle>Error</AlertTitle>
-                                    <AlertDescription>{passwordError}</AlertDescription>
-                                </Alert>
-                            )}
-                        </div>
-                    </TabsContent>
-                </Tabs>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-                <Button variant="destructive" onClick={handleDeleteClick} disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Delete Account
-                </Button>
-                <Button onClick={passwordValues.currentPassword ? handlePasswordSave : handleSave} disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {passwordValues.currentPassword ? 'Change Password' : 'Save Changes'}
-                </Button>
-            </CardFooter>
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={formVariants}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-6xl mx-auto"
+        >
+            <Card className="w-full mt-10 overflow-x-hidden">
+                <CardHeader>
+                    <CardTitle>{title}</CardTitle>
+                    <CardDescription>Manage your account settings and preferences.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Tabs defaultValue="basic-info" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="basic-info">Basic Info</TabsTrigger>
+                            <TabsTrigger value="password">Password</TabsTrigger>
+                        </TabsList>
+                        <AnimatePresence mode="wait">
+                            <TabsContent value="basic-info">
+                                <motion.div 
+                                    className="space-y-4"
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="hidden"
+                                    variants={formVariants}
+                                >
+                                    <motion.div 
+                                        className="flex items-center space-x-4"
+                                        variants={inputVariants}
+                                        custom={0}
+                                    >
+                                        <Avatar className="w-20 h-20">
+                                            <AvatarImage src={`data:image/png;base64,${values.avatar}`} alt="Profile Photo" />
+                                            <AvatarFallback>{values.name?.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <Button variant="contained" size="sm">
+                                            <label className="flex items-center cursor-pointer">
+                                                <Camera className="mr-2 h-4 w-4" />
+                                                Change Photo
+                                                <input type="file" accept="image/*" hidden onChange={handleUploadPhoto} />
+                                            </label>
+                                        </Button>
+                                    </motion.div>
+                                    <div className="grid gap-4">
+                                        {[
+                                            { id: "username", label: "Username", value: userInfo.username, readOnly: true },
+                                            { id: "name", label: "Name", value: values.name },
+                                            { id: "email", label: "Email", value: values.email, type: "email" },
+                                            { id: "address", label: "Address", value: values.address },
+                                            { id: "phoneNumber", label: "Phone Number", value: values.phoneNumber }
+                                        ].map((field, i) => (
+                                            <motion.div 
+                                                key={field.id}
+                                                className="grid gap-2"
+                                                variants={inputVariants}
+                                                custom={i + 1}
+                                            >
+                                                <Label htmlFor={field.id}>{field.label}</Label>
+                                                <Input 
+                                                    id={field.id}
+                                                    name={field.id}
+                                                    type={field.type || "text"}
+                                                    value={field.value}
+                                                    onChange={handleInputChange}
+                                                    readOnly={field.readOnly}
+                                                    disabled={field.readOnly}
+                                                />
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </TabsContent>
+                            <TabsContent value="password">
+                                <motion.div 
+                                    className="space-y-4"
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="hidden"
+                                    variants={formVariants}
+                                >
+                                    {[
+                                        { id: "currentPassword", label: "Current Password" },
+                                        { id: "newPassword", label: "New Password" },
+                                        { id: "confirmNewPassword", label: "Confirm New Password" }
+                                    ].map((field, i) => (
+                                        <motion.div 
+                                            key={field.id}
+                                            className="grid gap-2"
+                                            variants={inputVariants}
+                                            custom={i}
+                                        >
+                                            <Label htmlFor={field.id}>{field.label}</Label>
+                                            <Input 
+                                                id={field.id}
+                                                name={field.id}
+                                                type="password"
+                                                value={passwordValues[field.id]}
+                                                onChange={handlePasswordChange}
+                                            />
+                                        </motion.div>
+                                    ))}
+                                    {passwordError && (
+                                        <motion.div
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="hidden"
+                                            variants={alertVariants}
+                                        >
+                                            <Alert variant="destructive">
+                                                <AlertCircle className="h-4 w-4" />
+                                                <AlertTitle>Error</AlertTitle>
+                                                <AlertDescription>{passwordError}</AlertDescription>
+                                            </Alert>
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            </TabsContent>
+                        </AnimatePresence>
+                    </Tabs>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                    <Button variant="destructive" onClick={handleDeleteClick} disabled={isLoading}>
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Delete Account
+                    </Button>
+                    <Button onClick={passwordValues.currentPassword ? handlePasswordSave : handleSave} disabled={isLoading}>
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {passwordValues.currentPassword ? 'Change Password' : 'Save Changes'}
+                    </Button>
+                </CardFooter>
+            </Card>
 
             <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
                 <AlertDialogContent>
@@ -321,22 +425,40 @@ export default function AccountSettingsForm({
                 </AlertDialogContent>
             </AlertDialog>
 
-            {showUpdateAlert && (
-                <Alert
-                    className="fixed bottom-4 right-4 w-auto"
-                    variant={updateAlertType === 'error' ? 'destructive' : 'default'}
-                >
-                    <AlertTitle>{updateAlertType === 'success' ? 'Success' : 'Error'}</AlertTitle>
-                    <AlertDescription>{updateAlertMessage}</AlertDescription>
-                </Alert>
-            )}
+            <AnimatePresence>
+                {showUpdateAlert && (
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        variants={alertVariants}
+                        className="fixed bottom-4 right-4"
+                    >
+                        <Alert
+                            className="w-auto"
+                            variant={updateAlertType === 'error' ? 'destructive' : 'default'}
+                        >
+                            <AlertTitle>{updateAlertType === 'success' ? 'Success' : 'Error'}</AlertTitle>
+                            <AlertDescription>{updateAlertMessage}</AlertDescription>
+                        </Alert>
+                    </motion.div>
+                )}
 
-            {showDeleteAlert && (
-                <Alert className="fixed bottom-4 right-4 w-auto">
-                    <AlertTitle>Success</AlertTitle>
-                    <AlertDescription>Your account has been deleted successfully.</AlertDescription>
-                </Alert>
-            )}
-        </Card>
+                {showDeleteAlert && (
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        variants={alertVariants}
+                        className="fixed bottom-4 right-4"
+                    >
+                        <Alert className="w-auto">
+                            <AlertTitle>Success</AlertTitle>
+                            <AlertDescription>Your account has been deleted successfully.</AlertDescription>
+                        </Alert>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
     )
 }
