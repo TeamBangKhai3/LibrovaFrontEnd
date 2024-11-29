@@ -43,7 +43,7 @@ export default function UserDashboard() {
                     links={breadcrumbLinks} 
                     current="Home" 
                     sx={{ px: 3 }}
-                    disabledLinks={['Publisher']} 
+                    disabledLinks={['User']} 
                 />
                 
                 <Box sx={{ px: 3, py: 2 }}>

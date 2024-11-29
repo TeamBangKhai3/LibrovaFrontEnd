@@ -35,11 +35,13 @@ import {
     Grid,
     ShoppingCart,
     ShoppingBag,
-    Package
+    Package,
+    MinusCircle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import Logo from '@/assets/logotrans.png';
+import { toast } from "sonner";
 
 const CustomAppBar = ({ 
     userInfoEndpoint,
@@ -53,7 +55,11 @@ const CustomAppBar = ({
     const [loading, setLoading] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
+    const [cartItems, setCartItems] = useState([]);
+    const [loadingCart, setLoadingCart] = useState(false);
     const navigate = useNavigate();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const isUser = userType === 1;
 
@@ -97,6 +103,68 @@ const CustomAppBar = ({
         fetchUserInfo();
     }, [userInfoEndpoint, loginRoute, navigate]);
 
+    useEffect(() => {
+        // const fetchCartCount = async () => {
+        //     const sessionToken = localStorage.getItem('sessionToken');
+        //     if (!sessionToken || !isUser) return;
+
+        //     try {
+        //         const response = await axios.get(`${backendUrl}/order/getcartcount`, {
+        //             headers: {
+        //                 'Authorization': `Bearer ${sessionToken}`
+        //             }
+        //         });
+        //         setCartCount(response.data.count || 0);
+        //     } catch (error) {
+        //         console.error('Error fetching cart count:', error);
+        //     }
+        // };
+
+        // // Initial fetch
+        // fetchCartCount();
+
+        // Listen for cart refresh events
+        const handleCartRefresh = () => {
+            // fetchCartCount();
+            fetchCartItems();
+        };
+
+        window.addEventListener('cartRefresh', handleCartRefresh);
+
+        return () => {
+            window.removeEventListener('cartRefresh', handleCartRefresh);
+        };
+    }, [backendUrl, isUser]);
+
+    const fetchCartItems = async () => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken || !isUser) return;
+
+        setLoadingCart(true);
+        try {
+            const response = await axios.get(`${backendUrl}/order/vieworder`, {
+                headers: {
+                    'Authorization': `Bearer ${sessionToken}`
+                }
+            });
+            
+            if (response.data && response.data.orderItems) {
+                setCartItems(response.data.orderItems);
+                setCartCount(response.data.orderItems.length);
+            }
+        } catch (error) {
+            console.error('Error fetching cart items:', error);
+        } finally {
+            setLoadingCart(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isUser) {
+            fetchCartItems();
+        }
+    }, [isUser]);
+
     const handleLogout = () => {
         localStorage.removeItem('sessionToken');
         navigate(loginRoute);
@@ -112,10 +180,37 @@ const CustomAppBar = ({
         return name.split(' ').map(n => n[0]).join('').toUpperCase();
     };
 
+    const handleDeleteFromCart = async (id) => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken) return;
+
+        try {
+            const response = await axios.delete(`${backendUrl}/order/deletefromcart/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${sessionToken}`
+                }
+            });
+
+            if (response.status === 200) {
+                // Optimistically remove the item from the UI
+                const updatedItems = cartItems.filter(item => item.orderItemID !== id);
+                setCartItems(updatedItems);
+                setCartCount(updatedItems.length);
+                
+                toast.success("Item removed from cart");
+            }
+        } catch (error) {
+            console.error('Error removing item from cart:', error);
+            toast.error("Failed to remove item from cart");
+            // Refresh cart to ensure UI is in sync with server
+            fetchCartItems();
+        }
+    };
+
     return (
         <motion.header 
             className={cn(
-                "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+                "sticky top-0 z-50 w-full border-b bg-white",
                 className
             )}
             initial={{ y: -100 }}
@@ -151,11 +246,11 @@ const CustomAppBar = ({
                         <Button
                             key={item.path}
                             variant="ghost"
-                            className="flex items-center space-x-2 px-4"
+                            className="flex items-center space-x-2 px-4 hover:bg-transparent bg-transparent"
                             onClick={() => handleNavigate(item.path)}
                         >
                             <item.icon className="h-4 w-4" />
-                            <span>{item.label}</span>
+                            <span className="hover:underline">{item.label}</span>
                         </Button>
                     ))}
                 </div>
@@ -188,14 +283,14 @@ const CustomAppBar = ({
                                 <Button 
                                     variant="ghost" 
                                     size="icon"
-                                    className="relative"
+                                    className="relative hover:bg-transparent bg-transparent"
                                 >
                                     <ShoppingCart className="h-5 w-5" />
                                     <Badge 
                                         variant="secondary" 
                                         className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center"
                                     >
-                                        0
+                                        {cartCount}
                                     </Badge>
                                 </Button>
                             </PopoverTrigger>
@@ -219,32 +314,89 @@ const CustomAppBar = ({
                                     </div>
                                     <Separator />
                                     <ScrollArea className="h-[300px]">
-                                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                                            <Package className="h-12 w-12 mb-2" />
-                                            <p className="text-sm">Your cart is empty</p>
+                                        {loadingCart ? (
+                                            <div className="space-y-4">
+                                                {[1, 2, 3].map((i) => (
+                                                    <div key={i} className="flex items-center space-x-4">
+                                                        <Skeleton className="h-16 w-12" />
+                                                        <div className="flex-1 space-y-2">
+                                                            <Skeleton className="h-4 w-3/4" />
+                                                            <Skeleton className="h-4 w-1/2" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : cartItems.length === 0 ? (
+                                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                                                <Package className="h-12 w-12 mb-2" />
+                                                <p className="text-sm">Your cart is empty</p>
+                                                <Button 
+                                                    variant="link" 
+                                                    className="mt-2"
+                                                    onClick={() => handleNavigate('/books')}
+                                                >
+                                                    Browse Books
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <AnimatePresence initial={false}>
+                                                    {cartItems.map((item) => (
+                                                        <motion.div
+                                                            key={item.orderItemID}
+                                                            initial={{ opacity: 1, height: "auto" }}
+                                                            exit={{
+                                                                opacity: 0,
+                                                                height: 0,
+                                                                marginTop: 0,
+                                                                marginBottom: 0,
+                                                                overflow: "hidden"
+                                                            }}
+                                                            transition={{
+                                                                opacity: { duration: 0.2 },
+                                                                height: { duration: 0.2 }
+                                                            }}
+                                                            className="flex items-center space-x-4 group"
+                                                        >
+                                                            <div className="h-16 w-12 overflow-hidden rounded">
+                                                                <img 
+                                                                    src={`data:image/jpeg;base64,${item.eBook.cover}`}
+                                                                    alt={item.eBook.title}
+                                                                    className="h-full w-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 space-y-1">
+                                                                <p className="text-sm font-medium leading-none">{item.eBook.title}</p>
+                                                                <p className="text-sm text-muted-foreground">{item.eBook.author}</p>
+                                                                <p className="text-sm font-medium">${item.eBook.price.toFixed(2)}</p>
+                                                            </div>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                onClick={() => handleDeleteFromCart(item.orderItemID)}
+                                                            >
+                                                                <MinusCircle className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
+                                                            </Button>
+                                                        </motion.div>
+                                                    ))}
+                                                </AnimatePresence>
+                                            </div>
+                                        )}
+                                    </ScrollArea>
+                                    {cartItems.length > 0 && (
+                                        <div className="flex items-center justify-between pt-4">
+                                            <div className="text-sm">
+                                                <p className="text-muted-foreground">Total Items</p>
+                                                <p className="font-medium">{cartItems.length}</p>
+                                            </div>
                                             <Button 
-                                                variant="link" 
-                                                className="mt-2"
-                                                onClick={() => handleNavigate('/books')}
+                                                onClick={() => handleNavigate('/checkout')}
                                             >
-                                                Browse Books
+                                                Checkout
                                             </Button>
                                         </div>
-                                    </ScrollArea>
-                                    {/* Uncomment and modify when implementing cart functionality
-                                    <div className="flex items-center justify-between pt-4">
-                                        <div className="text-sm">
-                                            <p className="text-muted-foreground">Subtotal</p>
-                                            <p className="font-medium">$0.00</p>
-                                        </div>
-                                        <Button 
-                                            size="sm" 
-                                            onClick={() => handleNavigate('/checkout')}
-                                        >
-                                            Checkout
-                                        </Button>
-                                    </div>
-                                    */}
+                                    )}
                                 </div>
                             </PopoverContent>
                         </Popover>
@@ -256,49 +408,52 @@ const CustomAppBar = ({
                             <Skeleton className="h-4 w-24" />
                         </div>
                     ) : userInfo ? (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button 
-                                    variant="ghost" 
-                                    className="relative h-8 w-8 rounded-full"
-                                >
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage 
-                                            src={userInfo.avatar ? `data:image/jpeg;base64,${userInfo.avatar}` : null}
-                                            alt={userInfo.name} 
-                                        />
-                                        <AvatarFallback>{getInitials(userInfo.name)}</AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end" forceMount>
-                                <DropdownMenuLabel className="font-normal">
-                                    <div className="flex flex-col space-y-1">
-                                        <p className="text-sm font-medium leading-none">{userInfo.name}</p>
-                                        <p className="text-xs leading-none text-muted-foreground">
-                                            {userInfo.email}
-                                        </p>
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleNavigate(homeRoute)}>
-                                    <Home className="mr-2 h-4 w-4" />
-                                    <span>Home</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleNavigate(accountSettingRoute)}>
-                                    <Settings className="mr-2 h-4 w-4" />
-                                    <span>Settings</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                    className="text-red-500 focus:text-red-500" 
-                                    onClick={handleLogout}
-                                >
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Log out</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center space-x-4">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button 
+                                        variant="ghost" 
+                                        className="flex items-center space-x-4 h-auto px-2 hover:bg-accent hover:text-accent-foreground"
+                                    >
+                                        <span className="hidden md:inline text-sm">Hello, {userInfo.name.split(' ')[0]}</span>
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage 
+                                                src={userInfo.avatar ? `data:image/jpeg;base64,${userInfo.avatar}` : null}
+                                                alt={userInfo.name} 
+                                            />
+                                            <AvatarFallback>{getInitials(userInfo.name)}</AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end" forceMount>
+                                    <DropdownMenuLabel className="font-normal">
+                                        <div className="flex flex-col space-y-1">
+                                            <p className="text-sm font-medium leading-none">{userInfo.name}</p>
+                                            <p className="text-xs leading-none text-muted-foreground">
+                                                {userInfo.email}
+                                            </p>
+                                        </div>
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleNavigate(homeRoute)}>
+                                        <Home className="mr-2 h-4 w-4" />
+                                        <span>Home</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleNavigate(accountSettingRoute)}>
+                                        <Settings className="mr-2 h-4 w-4" />
+                                        <span>Settings</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                        className="text-red-500 focus:text-red-500" 
+                                        onClick={handleLogout}
+                                    >
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        <span>Log out</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     ) : (
                         <Button 
                             variant="ghost"
@@ -311,6 +466,44 @@ const CustomAppBar = ({
                     )}
                 </div>
             </div>
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, x: -300 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -300 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 md:hidden"
+                    >
+                        <div className="flex flex-col h-full p-4">
+                            <div className="flex items-center justify-between mb-8">
+                                <img src={Logo} alt="Librova Logo" className="h-8 w-auto" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="hover:bg-transparent"
+                                >
+                                    <Menu className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                                {navigationItems.map((item) => (
+                                    <Button
+                                        key={item.path}
+                                        variant="ghost"
+                                        className="flex items-center justify-start space-x-2 w-full hover:bg-transparent bg-transparent"
+                                        onClick={() => handleNavigate(item.path)}
+                                    >
+                                        <item.icon className="h-4 w-4" />
+                                        <span>{item.label}</span>
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.header>
     );
 };

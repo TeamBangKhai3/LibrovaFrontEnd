@@ -29,6 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import MDEditor from '@uiw/react-md-editor';
 
 const MotionCard = motion(Card);
 
@@ -48,6 +49,8 @@ const BookForm = ({
         cover: '',
         isbn: ''
     });
+    const [ebookFile, setEbookFile] = useState(null);
+    const [hasExistingEbook, setHasExistingEbook] = useState(false);
     const [coverPreview, setCoverPreview] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
@@ -58,17 +61,47 @@ const BookForm = ({
     const deleteEbookEndpoint = `${backendUrl}/ebook/deleteebook/${bookId}`;
 
     useEffect(() => {
-        if (mode === 'edit' && initialData) {
-            setFormData(initialData);
-            if (initialData.cover) {
-                setCoverPreview(`data:image/jpeg;base64,${initialData.cover}`);
+        const fetchData = async () => {
+            if (mode === 'edit' && bookId) {
+                try {
+                    const [bookResponse, ebookResponse] = await Promise.all([
+                        axios.get(`${backendUrl}/ebook/getebook/${bookId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('sessionToken')}`
+                            }
+                        }),
+                        "a"
+                    ]);
+
+                    if (bookResponse.data) {
+                        setFormData({
+                            title: bookResponse.data.title || '',
+                            author: bookResponse.data.author || '',
+                            description: bookResponse.data.description || '',
+                            genre: bookResponse.data.genre || '',
+                            price: bookResponse.data.price?.toString() || '',
+                            cover: bookResponse.data.cover || '',
+                            isbn: bookResponse.data.isbn || ''
+                        });
+                        setCoverPreview(bookResponse.data.cover ? `data:image/jpeg;base64,${bookResponse.data.cover}` : '');
+                    }
+
+                    // Check if the response actually contains a file by checking its size
+                    setHasExistingEbook(ebookResponse.data && ebookResponse.data.size > 0);
+
+                } catch (error) {
+                    console.error('Error fetching book data:', error);
+                    if (error.response?.status !== 404) {
+                        toast.error('Failed to load book data');
+                    }
+                    setHasExistingEbook(false);
+                }
             }
-        }
-        const timer = setTimeout(() => {
             setPageLoading(false);
-        }, 1000);
-        return () => clearTimeout(timer);
-    }, [mode, initialData]);
+        };
+
+        fetchData();
+    }, [mode, bookId, backendUrl]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -116,22 +149,60 @@ const BookForm = ({
         const sessionToken = localStorage.getItem('sessionToken');
         
         try {
+            let bookResponse;
             if (mode === 'add') {
-                await axios.post(addEbookEndpoint, formData, {
+                bookResponse = await axios.post(addEbookEndpoint, formData, {
                     headers: {
                         'Authorization': `Bearer ${sessionToken}`
                     }
                 });
                 toast.success("Book added successfully");
             } else {
-                await axios.put(updateEbookEndpoint, { ...formData, eBookID: bookId }, {
+                bookResponse = await axios.put(updateEbookEndpoint, { ...formData, eBookID: bookId }, {
                     headers: {
                         'Authorization': `Bearer ${sessionToken}`
                     }
                 });
                 toast.success("Book updated successfully");
             }
-            if (onSuccess) onSuccess();
+
+            // Handle eBook file upload if present
+            if (ebookFile) {
+                const reader = new FileReader();
+                reader.readAsDataURL(ebookFile);
+                
+                await new Promise((resolve, reject) => {
+                    reader.onload = async () => {
+                        try {
+                            const targetId = mode === 'add' ? bookResponse.data.id : bookId;
+                            const base64String = reader.result.split(',')[1];
+                            
+                            await axios.post(
+                                `${backendUrl}/ebook/uploadebookfile/${targetId}`,
+                                base64String,
+                                {
+                                    headers: {
+                                        'Authorization': `Bearer ${sessionToken}`,
+                                        'Content-Type': 'text/plain'
+                                    }
+                                }
+                            );
+                            toast.success("eBook file uploaded successfully");
+                            resolve();
+                        } catch (error) {
+                            console.error('Error uploading ebook file:', error);
+                            toast.error("Failed to upload eBook file");
+                            reject(error);
+                        }
+                    };
+                    reader.onerror = (error) => {
+                        toast.error("Failed to read eBook file");
+                        reject(error);
+                    };
+                });
+            }
+
+            if (onSuccess) onSuccess(bookResponse.data);
         } catch (error) {
             toast.error(error.response?.data?.message || `Failed to ${mode} book`);
         } finally {
@@ -281,12 +352,36 @@ const BookForm = ({
                                             <SelectValue placeholder="Select genre" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Fiction">Fiction</SelectItem>
+                                            <SelectItem value="Dystopian">Dystopian</SelectItem>
+                                            <SelectItem value="Romance">Romance</SelectItem>
+                                            <SelectItem value="Young Adult">Young Adult</SelectItem>
+                                            <SelectItem value="Horror">Horror</SelectItem>
+                                            <SelectItem value="Historical Fiction">Historical Fiction</SelectItem>
                                             <SelectItem value="Non-Fiction">Non-Fiction</SelectItem>
-                                            <SelectItem value="Science Fiction">Science Fiction</SelectItem>
+                                            <SelectItem value="Classics">Classics</SelectItem>
                                             <SelectItem value="Fantasy">Fantasy</SelectItem>
+                                            <SelectItem value="Self-Help">Self-Help</SelectItem>
+                                            <SelectItem value="Fiction">Fiction</SelectItem>
+                                            <SelectItem value="Thriller">Thriller</SelectItem>
+                                            <SelectItem value="Literary Fiction">Literary Fiction</SelectItem>
                                             <SelectItem value="Mystery">Mystery</SelectItem>
-                                            <SelectItem value="Biography">Biography</SelectItem>
+                                            <SelectItem value="Science Fiction">Science Fiction</SelectItem>
+                                            <SelectItem value="Graphic Novel">Graphic Novel</SelectItem>
+                                            <SelectItem value="Children’s Fiction">Children’s Fiction</SelectItem>
+                                            <SelectItem value="Business">Business</SelectItem>
+                                            <SelectItem value="Finance">Finance</SelectItem>
+                                            <SelectItem value="Marketing">Marketing</SelectItem>
+                                            <SelectItem value="Technology">Technology</SelectItem>
+                                            <SelectItem value="Accounting">Accounting</SelectItem>
+                                            <SelectItem value="Science">Science</SelectItem>
+                                            <SelectItem value="Philosophy">Philosophy</SelectItem>
+                                            <SelectItem value="Education">Education</SelectItem>
+                                            <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                            <SelectItem value="Engineering">Engineering</SelectItem>
+                                            <SelectItem value="Psychology">Psychology</SelectItem>
+                                            <SelectItem value="Physics">Physics</SelectItem>
+                                            <SelectItem value="Statistics">Statistics</SelectItem>
+                                            <SelectItem value="Economics">Economics</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -313,15 +408,36 @@ const BookForm = ({
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    name="description"
+                                <Label>Description</Label>
+                                <MDEditor
                                     value={formData.description}
-                                    onChange={handleChange}
-                                    className="min-h-[100px]"
-                                    required
+                                    onChange={(value) => setFormData(prev => ({
+                                        ...prev,
+                                        description: value || ''
+                                    }))}
+                                    preview="edit"
+                                    height={200}
+                                    className="border rounded-md"
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>eBook File</Label>
+                                {hasExistingEbook && mode === 'edit' && (
+                                    <div className="text-sm text-muted-foreground mb-2">
+                                        This book already has an eBook file
+                                    </div>
+                                )}
+                                <Input
+                                    type="file"
+                                    accept=".pdf,.epub"
+                                    onChange={(e) => setEbookFile(e.target.files[0])}
+                                    className="cursor-pointer"
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                    {mode === 'edit' && hasExistingEbook
+                                        ? 'Upload a new eBook file to replace the existing one'
+                                        : 'Upload your eBook file (PDF or EPUB format)'}
+                                </p>
                             </div>
                             <div className="flex justify-between items-center">
                                 <Button

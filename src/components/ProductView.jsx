@@ -14,6 +14,8 @@ import { BookOpen, DollarSign, Hash, Pencil, Trash2, AlertCircle, RefreshCcw, He
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Rating } from "@/components/ui/rating";
+import { MarkdownPreview } from "@/components/ui/markdown-preview";
+import { toast } from "sonner";
 
 export default function ProductView({
     userType, // 1 for user, 2 for publisher
@@ -36,34 +38,101 @@ export default function ProductView({
     const [deleting, setDeleting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isInCart, setIsInCart] = useState(false);
+    const [orderItemId, setOrderItemId] = useState(null);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const navigate = useNavigate();
     const nothing = "No description available please contact the publisher for more information. Thank you! :)";
 
     const fetchData = async () => {
+        console.log('🔍 Starting fetchData for book ID:', id);
         setLoading(true);
         setError(null);
         try {
-            const headers = requiresAuth ? {
-                'Authorization': `Bearer ${localStorage.getItem('sessionToken')}`
-            } : {};
+            const sessionToken = localStorage.getItem('sessionToken');
+            console.log('📝 Session Token exists:', !!sessionToken);
+            console.log('👤 User Type:', userType);
 
-            const [bookResponse, ratingResponse, reviewsResponse] = await Promise.all([
+            const headers = {
+                'Authorization': `Bearer ${sessionToken}`,
+                'Content-Type': 'application/json'
+            };
+
+            console.log('🔒 Request Headers:', headers);
+            console.log('🌐 Making API calls...');
+
+            // Always fetch book data, ratings, and reviews
+            const apiCalls = [
                 axios.get(`${backendUrl}/ebook/getebook/${id}`, { headers }),
                 axios.get(`${backendUrl}/reviews/getaveragerating/${id}`),
                 axios.get(`${backendUrl}/reviews/getallreviews/${id}`)
-            ]);
+            ];
+
+            // Only fetch cart data for regular users (userType === 1)
+            if (userType === 1) {
+                console.log('🛒 Adding cart API call for regular user');
+                apiCalls.push(
+                    axios.get(`${backendUrl}/order/vieworder`, { headers })
+                );
+            }
+
+            const responses = await Promise.all(apiCalls);
+            console.log('✅ API Responses:', responses.map(r => ({ status: r.status, url: r.config.url })));
+
+            const [bookResponse, ratingResponse, reviewsResponse, ...rest] = responses;
 
             if (!bookResponse.data) {
                 throw new Error('Book not found');
             }
 
+            console.log('📚 Book Data:', bookResponse.data);
+            console.log('⭐ Rating:', ratingResponse.data);
+            console.log('💬 Reviews:', reviewsResponse.data);
+
             setBook(bookResponse.data);
             setTitle(bookResponse.data.title);
             setAverageRating(ratingResponse.data ? Number(ratingResponse.data) : 0);
             setReviews(reviewsResponse.data);
+
+            // Process cart data only for regular users
+            if (userType === 1 && rest.length > 0) {
+                const cartResponse = rest[0];
+                console.log('🛒 Cart Response:', cartResponse.data);
+                
+                // Check if book is in cart and store orderItemID if found
+                const cartItems = cartResponse.data.orderItems || [];
+                console.log('🛍️ Cart Items:', cartItems);
+                console.log('🔍 Current Book ID:', id);
+                console.log('📦 Cart Item IDs:', cartItems.map(item => item.eBook.eBookID));
+                
+                let orderItemToDelete = null;
+                const bookInCart = cartItems.some(item => {
+                    const cartBookId = item.eBook.eBookID;
+                    const currentBookId = parseInt(id);
+                    console.log('🔄 Comparing:', { cartBookId, currentBookId, matches: cartBookId === currentBookId });
+                    if (cartBookId === currentBookId) {
+                        orderItemToDelete = item.orderItemID;
+                        return true;
+                    }
+                    return false;
+                });
+
+                console.log('📌 Is Book in Cart?', bookInCart);
+                console.log('🏷️ Order Item ID to delete:', orderItemToDelete);
+                setIsInCart(bookInCart);
+                setOrderItemId(orderItemToDelete);
+            } else {
+                // Reset cart-related state for publishers
+                setIsInCart(false);
+                setOrderItemId(null);
+            }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('❌ Error in fetchData:', error);
+            console.error('Error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
             setError(
                 error.response?.status === 404
                     ? 'Book not found. It may have been deleted or moved.'
@@ -73,10 +142,6 @@ export default function ProductView({
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchData();
-    }, [id, backendUrl]);
 
     const handleDelete = async () => {
         if (!onDelete) return;
@@ -91,6 +156,115 @@ export default function ProductView({
             setDeleting(false);
         }
     };
+
+    const handleAddToCart = async () => {
+        console.log('🛒 Adding to cart, Book ID:', id);
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken) {
+            console.log('❌ No session token found, redirecting to login');
+            navigate(loginRoute);
+            return;
+        }
+
+        try {
+            console.log('🌐 Making addToCart API call...');
+            const response = await axios.post(
+                `${backendUrl}/order/addtocart/${id}`,
+                {},
+                {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                }
+            );
+
+            console.log('✅ Add to cart response:', response);
+            if (response.status === 200) {
+                console.log('📢 Dispatching cartRefresh event');
+                // Get the orderItemID from the response
+                const orderItemID = response.data?.orderItemID;
+                setOrderItemId(orderItemID);
+                setIsInCart(true);
+                window.dispatchEvent(new CustomEvent('cartRefresh'));
+                toast.success("Added to cart successfully");
+            }
+        } catch (error) {
+            console.error('❌ Error adding to cart:', error);
+            console.error('Error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
+            toast.error(error.response?.data?.message || "Failed to add to cart");
+        }
+    };
+
+    const handleDeleteFromCart = async () => {
+        console.log('🗑️ Deleting from cart, Book ID:', id, 'Order Item ID:', orderItemId);
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken) {
+            console.log('❌ No session token found, redirecting to login');
+            navigate(loginRoute);
+            return;
+        }
+
+        if (!orderItemId) {
+            console.error('❌ No orderItemId found for deletion');
+            toast.error("Cannot delete item: order item ID not found");
+            return;
+        }
+
+        try {
+            console.log('🌐 Making deleteFromCart API call...');
+            const response = await axios.delete(
+                `${backendUrl}/order/deletefromcart/${orderItemId}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                }
+            );
+
+            console.log('✅ Delete from cart response:', response);
+            if (response.status === 200) {
+                console.log('📢 Dispatching cartRefresh event');
+                setIsInCart(false);
+                setOrderItemId(null);
+                window.dispatchEvent(new CustomEvent('cartRefresh'));
+                toast.success("Removed from cart successfully");
+            }
+        } catch (error) {
+            console.error('❌ Error removing from cart:', error);
+            console.error('Error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status
+            });
+            toast.error(error.response?.data?.message || "Failed to remove from cart");
+        }
+    };
+
+    const handleBuyNow = async () => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken) {
+            navigate(loginRoute);
+            return;
+        }
+
+        try {
+            // First add to cart
+            await handleAddToCart();
+            // Then navigate to checkout
+            navigate('/cart');
+        } catch (error) {
+            console.error('Error processing buy now:', error);
+            toast.error("Failed to process purchase");
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [id, backendUrl]);
 
     if (error) {
         return (
@@ -238,19 +412,42 @@ export default function ProductView({
                                     )}
                                     {userType === 1 && (
                                         <div className="space-y-4 mt-6">
-                                            <Button
-                                                className="w-full"
-                                                variant="outline"
-                                                onClick={() => onAddToCart && onAddToCart(id)}
-                                            >
-                                                Add to Cart
-                                            </Button>
-                                            <Button
-                                                className="w-full"
-                                                onClick={() => onBuyNow && onBuyNow(id)}
-                                            >
-                                                Buy Now
-                                            </Button>
+                                            {book?.owned ? (
+                                                <Button
+                                                    className="w-full"
+                                                    onClick={() => navigate(`/user/read/${id}`)}
+                                                >
+                                                    Read Ebook
+                                                </Button>
+                                            ) : (
+                                                <>
+                                                    {isInCart ? (
+                                                        <Button
+                                                            className="w-full"
+                                                            variant="destructive"
+                                                            onClick={handleDeleteFromCart}
+                                                        >
+                                                            Delete from Cart
+                                                        </Button>
+                                                    ) : (
+                                                        <>
+                                                            <Button
+                                                                className="w-full"
+                                                                variant="outline"
+                                                                onClick={handleAddToCart}
+                                                            >
+                                                                Add to Cart
+                                                            </Button>
+                                                            <Button
+                                                                className="w-full"
+                                                                onClick={handleBuyNow}
+                                                            >
+                                                                Buy Now
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                </>
+                                            )}
                                         </div>
                                     )}
                                 </CardContent>
@@ -276,9 +473,10 @@ export default function ProductView({
                                                     {book.isbn}
                                                 </div>
                                             </div>
-                                            <p className="text-muted-foreground">
-                                                {book.description || nothing}
-                                            </p>
+                                            <MarkdownPreview 
+                                                content={book.description || nothing}
+                                                className="text-muted-foreground"
+                                            />
                                             <Badge>{book.genre}</Badge>
                                         </div>
                                     </CardContent>

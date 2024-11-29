@@ -64,7 +64,7 @@ const EditBook = () => {
                         disabledLinks={['Publisher']} 
                     />
                 </div>
-
+                
                 <BookForm 
                     mode={'edit'}
                     initialData={bookData}
