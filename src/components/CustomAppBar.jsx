@@ -28,15 +28,14 @@ import {
     Settings, 
     Search,
     BookOpen,
-    Library,
     BookMarked,
     Bookmark,
     Home,
-    Grid,
     ShoppingCart,
     ShoppingBag,
     Package,
-    MinusCircle
+    MinusCircle,
+    Grid
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -65,14 +64,13 @@ const CustomAppBar = ({
 
     const navigationItems = isUser ? [
         { icon: Home, label: 'Home', path: homeRoute },
-        { icon: BookOpen, label: 'Books', path: '/books' },
-        { icon: Library, label: 'Library', path: '/library' },
+        { icon: BookOpen, label: 'Books', path: '/user/books' },
         { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks' },
         { icon: Grid, label: 'Categories', path: '/categories' }
     ] : [
         { icon: Home, label: 'Home', path: homeRoute },
         { icon: BookOpen, label: 'My Books', path: '/mybooks' },
-        { icon: Library, label: 'Add Book', path: '/publisher/addebook' },
+        { icon: Grid, label: 'Add Book', path: '/publisher/addebook' },
         { icon: Grid, label: 'Analytics', path: '/analytics' }
     ];
 

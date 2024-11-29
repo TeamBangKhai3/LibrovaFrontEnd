@@ -18,6 +18,7 @@ import EditBook from "./forms/EditBook.jsx";
 import UserProductView from "./home/UserProductView.jsx";
 import ReadBook from "./pages/ReadBook.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
+import BooksPage from "./pages/BooksPage.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
@@ -28,6 +29,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/user/login" element={<UsrLogin/>} />
                 <Route path="/user/register" element={<UsrRegister/>} />
                 <Route path="/user/home" element={<UserDashboard/>} />
+                <Route path="/user/books" element={<BooksPage/>} />
                 <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
                 <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
                 <Route path="user/read/:id" element={<ReadBook />} />
