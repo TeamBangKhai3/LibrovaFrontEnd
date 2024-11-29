@@ -1,182 +1,510 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Box, Container, Toolbar, IconButton, Typography, Avatar, Menu, MenuItem, ButtonBase, Button, InputBase } from '@mui/material';
-import { ShoppingCartOutlined, BookmarkBorderOutlined, LibraryBooksOutlined, Search as SearchIcon } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import logotrans from '../assets/logotrans.png';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+    Menu, 
+    User, 
+    LogOut, 
+    Settings, 
+    Search,
+    BookOpen,
+    Library,
+    BookMarked,
+    Bookmark,
+    Home,
+    Grid,
+    ShoppingCart,
+    ShoppingBag,
+    Package,
+    MinusCircle
+} from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import Logo from '@/assets/logotrans.png';
+import { toast } from "sonner";
 
-const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #D3D3D3',
-    '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    marginRight: theme.spacing(2),
-    marginLeft: 0,
-    width: '55svw',
-    height: '45px',
-    display: 'flex',
-    alignItems: 'center',
-    color: 'black',
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'black',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-        padding: theme.spacing(1, 1, 1, 0),
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        height: '100%',
-    },
-}));
-
-const CustomAppBar = ({ userInfoEndpoint, loginRoute, homeRoute, accountSettingRoute }) => {
-    const settings = ['Account', 'Ebook Manager', 'Logout'];
+const CustomAppBar = ({ 
+    userInfoEndpoint,
+    loginRoute = '/login',
+    homeRoute = '/home',
+    accountSettingRoute = '/accountsetting',
+    className = "",
+    userType = 1
+}) => {
+    const [userInfo, setUserInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [searchFocused, setSearchFocused] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
+    const [cartItems, setCartItems] = useState([]);
+    const [loadingCart, setLoadingCart] = useState(false);
     const navigate = useNavigate();
-    const [avatar, setAvatar] = useState(null);
-    const [anchorElUser, setAnchorElUser] = useState(null);
-    const [username, setUsername] = useState('');
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    const isUser = userType === 1;
+
+    const navigationItems = isUser ? [
+        { icon: Home, label: 'Home', path: homeRoute },
+        { icon: BookOpen, label: 'Books', path: '/books' },
+        { icon: Library, label: 'Library', path: '/library' },
+        { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks' },
+        { icon: Grid, label: 'Categories', path: '/categories' }
+    ] : [
+        { icon: Home, label: 'Home', path: homeRoute },
+        { icon: BookOpen, label: 'My Books', path: '/mybooks' },
+        { icon: Library, label: 'Add Book', path: '/publisher/addebook' },
+        { icon: Grid, label: 'Analytics', path: '/analytics' }
+    ];
 
     useEffect(() => {
         const fetchUserInfo = async () => {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (!sessionToken) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await axios.get(userInfoEndpoint, {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('sessionToken')}`
+                        'Authorization': `Bearer ${sessionToken}`
                     }
                 });
-                if (response.status === 200) {
-                    setUsername(response.data.username);
-                    setAvatar(response.data.avatar);
-                } else {
-                    navigate(loginRoute);
-                }
+                setUserInfo(response.data);
             } catch (error) {
                 console.error('Error fetching user info:', error);
+                localStorage.removeItem('sessionToken');
                 navigate(loginRoute);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchUserInfo();
-    }, [navigate, userInfoEndpoint, loginRoute]);
+    }, [userInfoEndpoint, loginRoute, navigate]);
 
-    const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
+    useEffect(() => {
+        // const fetchCartCount = async () => {
+        //     const sessionToken = localStorage.getItem('sessionToken');
+        //     if (!sessionToken || !isUser) return;
+
+        //     try {
+        //         const response = await axios.get(`${backendUrl}/order/getcartcount`, {
+        //             headers: {
+        //                 'Authorization': `Bearer ${sessionToken}`
+        //             }
+        //         });
+        //         setCartCount(response.data.count || 0);
+        //     } catch (error) {
+        //         console.error('Error fetching cart count:', error);
+        //     }
+        // };
+
+        // // Initial fetch
+        // fetchCartCount();
+
+        // Listen for cart refresh events
+        const handleCartRefresh = () => {
+            // fetchCartCount();
+            fetchCartItems();
+        };
+
+        window.addEventListener('cartRefresh', handleCartRefresh);
+
+        return () => {
+            window.removeEventListener('cartRefresh', handleCartRefresh);
+        };
+    }, [backendUrl, isUser]);
+
+    const fetchCartItems = async () => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken || !isUser) return;
+
+        setLoadingCart(true);
+        try {
+            const response = await axios.get(`${backendUrl}/order/vieworder`, {
+                headers: {
+                    'Authorization': `Bearer ${sessionToken}`
+                }
+            });
+            
+            if (response.data && response.data.orderItems) {
+                setCartItems(response.data.orderItems);
+                setCartCount(response.data.orderItems.length);
+            }
+        } catch (error) {
+            console.error('Error fetching cart items:', error);
+        } finally {
+            setLoadingCart(false);
+        }
     };
 
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };
+    useEffect(() => {
+        if (isUser) {
+            fetchCartItems();
+        }
+    }, [isUser]);
 
     const handleLogout = () => {
         localStorage.removeItem('sessionToken');
         navigate(loginRoute);
     };
 
-    const handleAccount = () => {
-        navigate(accountSettingRoute);
+    const handleNavigate = (route) => {
+        navigate(route);
+        setIsMobileMenuOpen(false);
+    };
+
+    const getInitials = (name) => {
+        if (!name) return 'U';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    };
+
+    const handleDeleteFromCart = async (id) => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken) return;
+
+        try {
+            const response = await axios.delete(`${backendUrl}/order/deletefromcart/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${sessionToken}`
+                }
+            });
+
+            if (response.status === 200) {
+                // Optimistically remove the item from the UI
+                const updatedItems = cartItems.filter(item => item.orderItemID !== id);
+                setCartItems(updatedItems);
+                setCartCount(updatedItems.length);
+                
+                toast.success("Item removed from cart");
+            }
+        } catch (error) {
+            console.error('Error removing item from cart:', error);
+            toast.error("Failed to remove item from cart");
+            // Refresh cart to ensure UI is in sync with server
+            fetchCartItems();
+        }
     };
 
     return (
-        <>
-            <AppBar position="sticky" sx={{ height: '80px', bgcolor: 'white', boxShadow: 'none',width:'100svw' }}>
-                <Container maxWidth="x1" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <Toolbar disableGutters sx={{ width: '100%' }}>
-                        <ButtonBase onClick={() => navigate(homeRoute)}>
-                            <Box component="img" src={logotrans} alt="Logo" sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, height: '60px', marginLeft: '20px', marginRight: '5svw' }} />
-                        </ButtonBase>
-                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, alignItems: 'center', Width: '68svw', marginRight: '5svw' }}>
-                            <Search>
-                                <SearchIconWrapper>
-                                    <SearchIcon />
-                                </SearchIconWrapper>
-                                <StyledInputBase
-                                    placeholder="Search…"
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                            </Search>
-                        </Box>
-                        <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-                            <IconButton sx={{ color: 'black', fontSize: '33px' }}>
-                                <ShoppingCartOutlined sx={{ fontSize: 'inherit' }} />
-                            </IconButton>
-                            <IconButton sx={{ color: 'black', fontSize: '33px' }}>
-                                <BookmarkBorderOutlined sx={{ fontSize: 'inherit' }} />
-                            </IconButton>
-                            <IconButton sx={{ color: 'black', fontSize: '33px', marginRight: '10px' }}>
-                                <LibraryBooksOutlined sx={{ fontSize: 'inherit' }} />
-                            </IconButton>
-                            <ButtonBase sx={{ display: 'flex', alignItems: 'center', color: 'black', marginRight: '10px' }} onClick={handleOpenUserMenu}>
-                                <Typography sx={{ marginRight: '10px' }}>
-                                    Hello, {username}
-                                </Typography>
-                                <Avatar src={`data:image/png;base64,${avatar}`} />
-                            </ButtonBase>
-                            <Menu
-                                sx={{ mt: '45px' }}
-                                id="menu-appbar"
-                                anchorEl={anchorElUser}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={Boolean(anchorElUser)}
-                                onClose={handleCloseUserMenu}
-                            >
-                                {settings.map((setting) => (
-                                    <MenuItem
-                                        key={setting}
-                                        onClick={() => {
-                                            handleCloseUserMenu();
-                                            if (setting === 'Logout') handleLogout();
-                                            if (setting === 'Account') handleAccount();
-                                        }}
-                                    >
-                                        <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
-                                    </MenuItem>
-                                ))}
-                            </Menu>
-                        </Box>
-                    </Toolbar>
-                </Container>
-            </AppBar>
-            <AppBar position="sticky" sx={{ height: '50px', bgcolor: '#E0E0E0', top: '80px', width: '100svw', boxShadow: 1 }}>
-                <Container maxWidth="xl" sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <Toolbar disableGutters sx={{ width: '100%', justifyContent: 'space-around' }}>
+        <motion.header 
+            className={cn(
+                "sticky top-0 z-50 w-full border-b bg-white",
+                className
+            )}
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.3 }}
+        >
+            <div className="container flex h-16 max-w-full items-center px-8">
+                <div className="flex items-center space-x-6 pl-4">
+                    <Button 
+                        variant="ghost" 
+                        className="hidden md:flex items-center space-x-2 p-0"
+                        onClick={() => handleNavigate(homeRoute)}
+                    >
+                        <img 
+                            src={Logo} 
+                            alt="Librova Logo" 
+                            className="h-10 w-auto object-contain"
+                        />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="md:hidden"
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    >
+                        <Menu className="h-5 w-5" />
+                    </Button>
+                </div>
+
+                {/* Navigation Items - Desktop */}
+                <div className="hidden md:flex items-center space-x-2 ml-8">
+                    {navigationItems.map((item) => (
                         <Button
-                            color="inherit"
-                            sx={{ color: 'black', fontWeight: 'bold' }}
-                            onClick={() => navigate(homeRoute)}
+                            key={item.path}
+                            variant="ghost"
+                            className="flex items-center space-x-2 px-4 hover:bg-transparent bg-transparent"
+                            onClick={() => handleNavigate(item.path)}
                         >
-                            Home
+                            <item.icon className="h-4 w-4" />
+                            <span className="hover:underline">{item.label}</span>
                         </Button>
-                        <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>Books</Button>
-                        <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>Genre</Button>
-                        <Button color="inherit" sx={{ color: 'black', fontWeight: 'bold' }}>???</Button>
-                    </Toolbar>
-                </Container>
-            </AppBar>
-        </>
+                    ))}
+                </div>
+
+                {/* Search Bar */}
+                <div className="flex-1 px-8">
+                    <div className={cn(
+                        "relative max-w-md mx-auto transition-all duration-300",
+                        searchFocused ? "scale-105" : "scale-100"
+                    )}>
+                        <Search className={cn(
+                            "absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform transition-colors",
+                            searchFocused ? "text-primary" : "text-muted-foreground"
+                        )} />
+                        <Input
+                            type="search"
+                            placeholder="Search books..."
+                            className="w-full pl-8 bg-muted/50"
+                            onFocus={() => setSearchFocused(true)}
+                            onBlur={() => setSearchFocused(false)}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-4 pr-4">
+                    {/* Cart Button with Popover - Only shown for users */}
+                    {isUser && (
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="relative hover:bg-transparent bg-transparent"
+                                >
+                                    <ShoppingCart className="h-5 w-5" />
+                                    <Badge 
+                                        variant="secondary" 
+                                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center"
+                                    >
+                                        {cartCount}
+                                    </Badge>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent 
+                                className="w-80" 
+                                align="end"
+                                sideOffset={8}
+                            >
+                                <div className="flex flex-col space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="font-medium leading-none">Shopping Cart</h4>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm"
+                                            className="gap-2 text-muted-foreground hover:text-primary"
+                                            onClick={() => handleNavigate('/cart')}
+                                        >
+                                            <ShoppingBag className="h-4 w-4" />
+                                            View Cart
+                                        </Button>
+                                    </div>
+                                    <Separator />
+                                    <ScrollArea className="h-[300px]">
+                                        {loadingCart ? (
+                                            <div className="space-y-4">
+                                                {[1, 2, 3].map((i) => (
+                                                    <div key={i} className="flex items-center space-x-4">
+                                                        <Skeleton className="h-16 w-12" />
+                                                        <div className="flex-1 space-y-2">
+                                                            <Skeleton className="h-4 w-3/4" />
+                                                            <Skeleton className="h-4 w-1/2" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : cartItems.length === 0 ? (
+                                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                                                <Package className="h-12 w-12 mb-2" />
+                                                <p className="text-sm">Your cart is empty</p>
+                                                <Button 
+                                                    variant="link" 
+                                                    className="mt-2"
+                                                    onClick={() => handleNavigate('/books')}
+                                                >
+                                                    Browse Books
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <AnimatePresence initial={false}>
+                                                    {cartItems.map((item) => (
+                                                        <motion.div
+                                                            key={item.orderItemID}
+                                                            initial={{ opacity: 1, height: "auto" }}
+                                                            exit={{
+                                                                opacity: 0,
+                                                                height: 0,
+                                                                marginTop: 0,
+                                                                marginBottom: 0,
+                                                                overflow: "hidden"
+                                                            }}
+                                                            transition={{
+                                                                opacity: { duration: 0.2 },
+                                                                height: { duration: 0.2 }
+                                                            }}
+                                                            className="flex items-center space-x-4 group"
+                                                        >
+                                                            <div className="h-16 w-12 overflow-hidden rounded">
+                                                                <img 
+                                                                    src={`data:image/jpeg;base64,${item.eBook.cover}`}
+                                                                    alt={item.eBook.title}
+                                                                    className="h-full w-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 space-y-1">
+                                                                <p className="text-sm font-medium leading-none">{item.eBook.title}</p>
+                                                                <p className="text-sm text-muted-foreground">{item.eBook.author}</p>
+                                                                <p className="text-sm font-medium">${item.eBook.price.toFixed(2)}</p>
+                                                            </div>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                onClick={() => handleDeleteFromCart(item.orderItemID)}
+                                                            >
+                                                                <MinusCircle className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
+                                                            </Button>
+                                                        </motion.div>
+                                                    ))}
+                                                </AnimatePresence>
+                                            </div>
+                                        )}
+                                    </ScrollArea>
+                                    {cartItems.length > 0 && (
+                                        <div className="flex items-center justify-between pt-4">
+                                            <div className="text-sm">
+                                                <p className="text-muted-foreground">Total Items</p>
+                                                <p className="font-medium">{cartItems.length}</p>
+                                            </div>
+                                            <Button 
+                                                onClick={() => handleNavigate('/checkout')}
+                                            >
+                                                Checkout
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </PopoverContent>
+                        </Popover>
+                    )}
+
+                    {loading ? (
+                        <div className="flex items-center space-x-4">
+                            <Skeleton className="h-8 w-8 rounded-full" />
+                            <Skeleton className="h-4 w-24" />
+                        </div>
+                    ) : userInfo ? (
+                        <div className="flex items-center space-x-4">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button 
+                                        variant="ghost" 
+                                        className="flex items-center space-x-4 h-auto px-2 hover:bg-accent hover:text-accent-foreground"
+                                    >
+                                        <span className="hidden md:inline text-sm">Hello, {userInfo.name.split(' ')[0]}</span>
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage 
+                                                src={userInfo.avatar ? `data:image/jpeg;base64,${userInfo.avatar}` : null}
+                                                alt={userInfo.name} 
+                                            />
+                                            <AvatarFallback>{getInitials(userInfo.name)}</AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end" forceMount>
+                                    <DropdownMenuLabel className="font-normal">
+                                        <div className="flex flex-col space-y-1">
+                                            <p className="text-sm font-medium leading-none">{userInfo.name}</p>
+                                            <p className="text-xs leading-none text-muted-foreground">
+                                                {userInfo.email}
+                                            </p>
+                                        </div>
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleNavigate(homeRoute)}>
+                                        <Home className="mr-2 h-4 w-4" />
+                                        <span>Home</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleNavigate(accountSettingRoute)}>
+                                        <Settings className="mr-2 h-4 w-4" />
+                                        <span>Settings</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                        className="text-red-500 focus:text-red-500" 
+                                        onClick={handleLogout}
+                                    >
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        <span>Log out</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    ) : (
+                        <Button 
+                            variant="ghost"
+                            className="gap-2"
+                            onClick={() => handleNavigate(loginRoute)}
+                        >
+                            <User className="h-4 w-4" />
+                            <span>Login</span>
+                        </Button>
+                    )}
+                </div>
+            </div>
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, x: -300 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -300 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 md:hidden"
+                    >
+                        <div className="flex flex-col h-full p-4">
+                            <div className="flex items-center justify-between mb-8">
+                                <img src={Logo} alt="Librova Logo" className="h-8 w-auto" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="hover:bg-transparent"
+                                >
+                                    <Menu className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                                {navigationItems.map((item) => (
+                                    <Button
+                                        key={item.path}
+                                        variant="ghost"
+                                        className="flex items-center justify-start space-x-2 w-full hover:bg-transparent bg-transparent"
+                                        onClick={() => handleNavigate(item.path)}
+                                    >
+                                        <item.icon className="h-4 w-4" />
+                                        <span>{item.label}</span>
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.header>
     );
 };
 

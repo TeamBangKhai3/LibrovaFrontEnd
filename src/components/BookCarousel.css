@@ -1,0 +1,10 @@
+/* BookCarousel.css */
+.carousel-container {
+    overflow-x: scroll;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+.carousel-container::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+}

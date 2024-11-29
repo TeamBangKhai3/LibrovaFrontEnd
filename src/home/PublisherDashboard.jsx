@@ -25,6 +25,7 @@ export default function PublisherDashboard() {
                 loginRoute="/publisher/login"
                 homeRoute="/publisher/home"
                 accountSettingRoute="/publisher/accountsetting"
+                userType={2}
             />
             <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <CustomBreadcrumbs links={breadcrumbLinks} current="Home" sx={{ marginLeft: '5%' }} disabledLinks={['Publisher']} />

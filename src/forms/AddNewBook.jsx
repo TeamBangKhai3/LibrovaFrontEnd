@@ -1,212 +1,105 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import {
-    Box,
-    Button,
-    TextField,
-    Typography,
-    Stack,
-    Avatar,
-    Snackbar,
-    Alert,
-    MenuItem,
-    Select,
-    FormControl, InputLabel
-} from '@mui/material';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import axios from "axios";
+import BookForm from "@/components/BookForm";
 import CustomAppBar from "../components/CustomAppBar.jsx";
 import CustomBreadcrumbs from "../components/CustomBreadcrumbs.jsx";
-import Grid from "@mui/material/Grid2";
 
-const AddNewBook = () => {
-    const [formData, setFormData] = useState({
-        title: '',
-        description:'',
-        author: '',
-        genre: '',
-        price: '',
-        cover: '',
-        isbn: ''
-    });
-    const [uploadSuccess, setUploadSuccess] = useState(false);
-    const [uploadError, setUploadError] = useState(false);
-    const [submitSuccess, setSubmitSuccess] = useState(false);
-    const [submitError, setSubmitError] = useState(false);
+const breadcrumbLinks = [
+    { label: 'Publisher', path: '/publisher/home' },
+    { label: 'Home', path: '/publisher/home' },
+];
 
+export default function AddNewBook() {
+    document.title = "Add New Book | Librova";
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
-    const pubiinfoEndpoint = `${backendUrl}/publishers/getpublisherinfo`;
-    const addEbookEndpoint = `${backendUrl}/ebook/addebook`;
-    const breadcrumbLinks = [
-        { label: 'Publisher', path: '/publisher/home' },
-        { label: 'Home', path: '/publisher/home' },
-    ];
-    document.title = "Add Book | Librova";
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setFormData({
-                ...formData,
-                cover: reader.result.split(',')[1] // Get base64 string without the prefix
-            });
-            setUploadSuccess(true);
-        };
-        reader.onerror = () => {
-            setUploadError(true);
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const sessionToken = localStorage.getItem('sessionToken');
+    const handleSubmit = async (formData) => {
+        setLoading(true);
+        setError(null);
         try {
-            const response = await axios.post(addEbookEndpoint, formData, {
+            const token = localStorage.getItem("sessionToken");
+            if (!token) {
+                toast.error("Please login to add a book");
+                navigate("/publisher/login");
+                return;
+            }
+
+            const response = await axios({
+                method: "post",
+                url: `${backendUrl}/ebook/addbook`,
+                data: formData,
                 headers: {
-                    'Authorization': `Bearer ${sessionToken}`
-                }
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
             });
-            console.log('Book added successfully:', response.data);
-            setSubmitSuccess(true);
-            setTimeout(
-                () => window.location.replace('/publisher/home'), // Redirect to the publisher home page
-            )
+
+            if (response.status === 200) {
+                toast.success("Book added successfully!");
+                navigate("/publisher/home");
+            }
         } catch (error) {
-            console.error('Error adding book:', error);
-            setSubmitError(true);
+            console.error("Error adding book:", error);
+            if (error.response?.status === 403) {
+                toast.error("Session expired. Please login again.");
+                localStorage.removeItem("sessionToken");
+                navigate("/publisher/login");
+            } else {
+                setError(
+                    error.response?.data?.message ||
+                    "Failed to add book. Please try again."
+                );
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <Box component={"section"} sx={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className="flex flex-col min-h-[100svh] overflow-hidden">
             <CustomAppBar
-                userInfoEndpoint={pubiinfoEndpoint}
+                userInfoEndpoint={`${backendUrl}/publishers/getpublisherinfo`}
                 loginRoute="/publisher/login"
                 homeRoute="/publisher/home"
                 accountSettingRoute="/publisher/accountsetting"
+                userType={2}
             />
 
-            <Box component="section" sx={{ marginTop: '15px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <CustomBreadcrumbs links={breadcrumbLinks} current="Add New Book" sx={{ marginLeft: '4%' }} disabledLinks={['Publisher']} />
-            </Box>
-            <Box component="section" sx={{marginTop:'5svh',width:'80svw',height:'70svh',bgcolor:'#D9D9D9', borderRadius:'20px'}}>
-                <Grid container spacing={1}>
-                    <Grid size={8}>
-                        <Stack rowGap={0.3} spacing={2} sx={{ marginX: '10%', marginTop: '5%'}}>
-                            <TextField
-                                label="Book Title"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                variant="outlined"
-                                fullWidth
-                            />
-                            <TextField
-                                label="Description"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                variant="outlined"
-                                fullWidth
-                            />
-                            <TextField
-                                label="Author"
-                                name="author"
-                                value={formData.author}
-                                onChange={handleChange}
-                                variant="outlined"
-                                fullWidth
-                            />
-                            <FormControl variant="outlined" fullWidth>
-                                <InputLabel>Genre</InputLabel>
-                                <Select
-                                    label="Genre"
-                                    name="genre"
-                                    value={formData.genre}
-                                    onChange={handleChange}
-                                >
-                                    <MenuItem value="">
-                                        <em>None</em>
-                                    </MenuItem>
-                                    <MenuItem value="Fiction">Fiction</MenuItem>
-                                    <MenuItem value="Non-Fiction">Non-Fiction</MenuItem>
-                                    <MenuItem value="Science Fiction">Science Fiction</MenuItem>
-                                    <MenuItem value="Fantasy">Fantasy</MenuItem>
-                                    <MenuItem value="Mystery">Mystery</MenuItem>
-                                    <MenuItem value="Biography">Biography</MenuItem>
-                                    {/* Add more genres as needed */}
-                                </Select>
-                            </FormControl>
-                            <TextField
-                                label="Price"
-                                name="price"
-                                value={formData.price}
-                                onChange={handleChange}
-                                variant="outlined"
-                                fullWidth
-                            />
-                            <TextField
-                                label="ISBN"
-                                name="isbn"
-                                value={formData.isbn}
-                                onChange={handleChange}
-                                variant="outlined"
-                                fullWidth
-                            />
-                            <Box component="section" sx={{display:'flex',justifyContent:'flex-end'}}>
-                                <Button variant="contained" color="primary" onClick={handleSubmit} sx={{marginLeft:'10px'}}>
-                                    Create New Book
-                                </Button>
-                            </Box>
-                        </Stack>
-                    </Grid>
-                    <Grid size={4} borderLeft="2px solid gray">
-                        <Box component="section" sx={{ width: '45svh', height: '65svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <Avatar
-                                alt="Cover Photo"
-                                src={formData.cover ? `data:image/png;base64,${formData.cover}` : "/static/images/avatar/placeholder.jpg"}
-                                sx={{ width: 279, height: 371, mb: 2 }}
-                                variant="square"
-                            />
-                            <Button variant="contained" color="primary" component="label" startIcon={<PhotoCamera />}>
-                                Upload Cover Image
-                                <input type="file" hidden onChange={handleFileChange} />
-                            </Button>
-                        </Box>
-                    </Grid>
-                </Grid>
-            </Box>
-            <Snackbar open={uploadSuccess} autoHideDuration={6000} onClose={() => setUploadSuccess(false)}>
-                <Alert onClose={() => setUploadSuccess(false)} severity="success" sx={{ width: '100%' }}>
-                    Successfully Uploaded
-                </Alert>
-            </Snackbar>
-            <Snackbar open={uploadError} autoHideDuration={6000} onClose={() => setUploadError(false)}>
-                <Alert onClose={() => setUploadError(false)} severity="error" sx={{ width: '100%' }}>
-                    Error Uploading File
-                </Alert>
-            </Snackbar>
-            <Snackbar open={submitSuccess} autoHideDuration={6000} onClose={() => setSubmitSuccess(false)}>
-                <Alert onClose={() => setSubmitSuccess(false)} severity="success" sx={{ width: '100%' }}>
-                    Book Added Successfully
-                </Alert>
-            </Snackbar>
-            <Snackbar open={submitError} autoHideDuration={6000} onClose={() => setSubmitError(false)}>
-                <Alert onClose={() => setSubmitError(false)} severity="error" sx={{ width: '100%' }}>
-                    Error Adding Book
-                </Alert>
-            </Snackbar>
-        </Box>
-    );
-};
+            <div className="flex-1 overflow-y-auto bg-background">
+                <div className="w-full p-4">
+                    <CustomBreadcrumbs 
+                        links={breadcrumbLinks} 
+                        current="Add New Book" 
+                        disabledLinks={['Publisher']} 
+                    />
+                </div>
 
-export default AddNewBook;
+                <div className="container mx-auto px-4 py-6">
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <h2 className="text-2xl font-semibold tracking-tight">
+                                    Add New Book
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Fill in the details below to add a new book
+                                </p>
+                            </div>
+                        </div>
+                        <BookForm
+                            mode="add"
+                            onSubmit={handleSubmit}
+                            loading={loading}
+                            error={error}
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
