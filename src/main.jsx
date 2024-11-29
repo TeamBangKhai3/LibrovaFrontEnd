@@ -16,23 +16,25 @@ import PublisherAddBook from "./forms/AddNewBook.jsx";
 import PublisherProductView from "./home/PublisherProductView.jsx"
 import EditBook from "./forms/EditBook.jsx";
 import UserProductView from "./home/UserProductView.jsx";
-
+import ReadBook from "./pages/ReadBook.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <BrowserRouter>
             <Routes>
+                {/*Testing the new Branch*/}
                 <Route path="/" element={<Navigate to="/user/login" />} />
                 <Route path="/user/login" element={<UsrLogin/>} />
                 <Route path="/user/register" element={<UsrRegister/>} />
                 <Route path="/user/home" element={<UserDashboard/>} />
                 <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
                 <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
+                <Route path="user/read/:id" element={<ReadBook />} />
                 <Route path="/publisher/login" element={<PublisherLogin/>} />
                 <Route path="/publisher/register" element={<PublisherRegister/>} />
                 <Route path="/publisher/home" element={<PublisherDashboard/>} />
                 <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
-                <Route path="/publisher/addbook" element={<PublisherAddBook/>} />
+                <Route path="/publisher/addebook" element={<PublisherAddBook/>} />
                 <Route path="publisher/home/ebookinfo/:id" element={<PublisherProductView/>} />
                 <Route path="publisher/home/ebookinfo/editinfo/:id" element={<EditBook/>} />
             </Routes>

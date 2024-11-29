@@ -1,409 +1,202 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Box, TextField, Button, Typography, Checkbox, FormControlLabel, Alert, IconButton, InputAdornment } from "@mui/material";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { toast, Toaster } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import logotrans from '../assets/logotrans.png';
 import loginbg from '../assets/loginbg.jpg';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
+const FormSchema = z.object({
+    username: z.string().min(2, { message: "Username is required" }),
+    password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+    confirmPassword: z.string().min(8, { message: "Confirm Password is required" }),
+    email: z.string().email({ message: "Email is invalid" }),
+    address: z.string().min(1, { message: "Address is required" }),
+    phoneNumber: z.string().min(1, { message: "Phone Number is required" }),
+    name: z.string().min(1, { message: "Name is required" }),
+});
 
 const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) => {
-    const [formData, setFormData] = useState({
-        username: '',
-        password: '',
-        confirmPassword: '',
-        email: '',
-        address: '',
-        phoneNumber: '',
-        name: '',
+    const navigate = useNavigate();
+    const form = useForm({
+        resolver: zodResolver(FormSchema),
+        defaultValues: {
+            username: '',
+            password: '',
+            confirmPassword: '',
+            email: '',
+            address: '',
+            phoneNumber: '',
+            name: '',
+        },
     });
 
-    const [errors, setErrors] = useState({});
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const navigate = useNavigate();
-
-    const handleChange = (e) => {
-        const { id, value } = e.target;
-        setFormData({ ...formData, [id]: value });
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-        if (!formData.username) newErrors.username = 'Username is required';
-        if (!formData.email) newErrors.email = 'Email is required';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-        if (!formData.password) newErrors.password = 'Password is required';
-        else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
-        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-        if (!formData.address) newErrors.address = 'Address is required';
-        if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone Number is required';
-        if (!formData.name) newErrors.name = 'Name is required';
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
+    const onSubmit = async (data) => {
+        if (data.password !== data.confirmPassword) {
+            form.setError("confirmPassword", { type: "manual", message: "Passwords do not match" });
+            return;
+        }
 
         try {
-            const response = await axios.post(registerEndpoint, {
-                username: formData.username,
-                password: formData.password,
-                email: formData.email,
-                address: formData.address,
-                phoneNumber: formData.phoneNumber,
-                name: formData.name,
-            });
-            console.log('Registration successful:', response.data);
-            localStorage.setItem('sessionToken', response.data); // Store the session token
-            setAlertMessage('Registered Successfully!');
-            setShowAlert(true);
-            setTimeout(() => {
-                navigate(redirectRoute); // Navigate to the home page or desired page
-            }, 3000); // Show alert for 3 seconds before navigating
+            const response = await axios.post(registerEndpoint, data);
+            if (response.data === "Username already exists") {
+                toast("Error", {
+                    description: "Username already exists",
+                    variant: "destructive",
+                });
+            } else {
+                localStorage.setItem('sessionToken', response.data);
+                toast("Success", {
+                    description: "Registered Successfully! You will be redirected shortly.",
+                    variant: "success",
+                });
+                setTimeout(() => navigate(redirectRoute), 3000);
+            }
         } catch (error) {
-            console.error('Registration error:', error);
+            const errorMessage = error.response?.data || "Registration error";
+            toast("Error", {
+                description: errorMessage,
+                variant: "destructive",
+            });
         }
     };
 
-    const handleClickShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const handleClickShowConfirmPassword = () => {
-        setShowConfirmPassword(!showConfirmPassword);
-    };
-
     return (
-        <Box
-            component={"section"}
-            sx={{
-                position: 'relative',
-                width: '100svw',
-                height: '100svh',
-                overflow: 'hidden',
-            }}
-        >
-            <Box
-                sx={{
-                    backgroundImage: `url(${loginbg})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    filter: 'blur(3px) brightness(0.3)',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    zIndex: -1,
-                }}
-            />
-            <Box
-                component={"div"}
-                bgcolor="white"
-                p={4}
-                borderRadius={4}
-                boxShadow={3}
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                width="90%"
-                maxWidth="400px"
-                sx={{ position: 'relative', zIndex: 1, margin: 'auto', top: '50%', transform: 'translateY(-50%)' }}
-            >
-                <Box component={"img"} src={logotrans} alt="logo" width={"100px"} height={"100px"} mb={2} />
-                <Box component={"header"} mb={2}>
-                    <Typography variant="h4" color="black" fontWeight={"bold"}>{title}</Typography>
-                </Box>
-                <Box component={"form"} onSubmit={handleSubmit} display="flex" flexDirection="column" width="100%">
-
-                    <TextField
-                        id="name"
-                        label="Name"
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        value={formData.name}
-                        onChange={handleChange}
-                        error={!!errors.name}
-                        helperText={errors.name}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
-                            },
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: 'black',
-                            },
-                        }}
-                    />                    <TextField
-                    id="username"
-                    label="Username"
-                    variant="outlined"
-                    fullWidth
-                    margin="dense"
-                    required
-                    value={formData.username}
-                    onChange={handleChange}
-                    error={!!errors.username}
-                    helperText={errors.username}
-                    InputProps={{ style: { backgroundColor: 'white' } }}
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                            '& fieldset': {
-                                borderColor: 'black',
-                            },
-                            '&:hover fieldset': {
-                                borderColor: 'black',
-                            },
-                            '&.Mui-focused fieldset': {
-                                borderColor: 'black',
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-input': {
-                                color: 'black',
-                            },
-                        },
-                        '& .MuiInputLabel-root.Mui-focused': {
-                            color: 'black',
-                        },
-                    }}
-                />
-
-
-                    <TextField
-                        id="password"
-                        label="Password"
-                        type={showPassword ? 'text' : 'password'}
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        value={formData.password}
-                        onChange={handleChange}
-                        error={!!errors.password}
-                        helperText={errors.password}
-                        InputProps={{
-                            style: { backgroundColor: 'white' },
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        edge="end"
-                                    >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
-                            },
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: 'black',
-                            },
-                        }}
-                    />
-                    <TextField
-                        id="confirmPassword"
-                        label="Confirm Password"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        error={!!errors.confirmPassword}
-                        helperText={errors.confirmPassword}
-                        InputProps={{
-                            style: { backgroundColor: 'white' },
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle confirm password visibility"
-                                        onClick={handleClickShowConfirmPassword}
-                                        edge="end"
-                                    >
-                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
-                            },
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: 'black',
-                            },
-                        }}
-                    />
-                    <TextField
-                        id="email"
-                        label="Email Address"
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        error={!!errors.email}
-                        helperText={errors.email}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
-                            },
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: 'black',
-                            },
-                        }}
-                    />
-                    <TextField
-                        id="phoneNumber"
-                        label="Phone Number"
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        value={formData.phoneNumber}
-                        onChange={handleChange}
-                        error={!!errors.phoneNumber}
-                        helperText={errors.phoneNumber}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
-                            },
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: 'black',
-                            },
-                        }}
-                    />
-                    <TextField
-                        id="address"
-                        label="Address"
-                        variant="outlined"
-                        fullWidth
-                        margin="dense"
-                        required
-                        value={formData.address}
-                        onChange={handleChange}
-                        error={!!errors.address}
-                        helperText={errors.address}
-                        InputProps={{ style: { backgroundColor: 'white' } }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: 'black',
-                                },
-                                '&.Mui-focused .MuiOutlinedInput-input': {
-                                    color: 'black',
-                                },
-                            },
-                            '& .MuiInputLabel-root.Mui-focused': {
-                                color: 'black',
-                            },
-                        }}
-                    />
-                    <FormControlLabel
-                        control={<Checkbox required />}
-                        label="Agree to Terms and Conditions"
-                        sx={{ alignSelf: 'flex-start', marginTop: 2 }}
-                    />
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        sx={{
-                            backgroundColor: 'black',
-                            '&:hover': {
-                                backgroundColor: 'black',
-                            },
-                        }}
-                    >
-                        Register
-                    </Button>
-                </Box>
-                <Typography variant="body2" mt={2} color={"black"}>
-                    Already have an account? <Button onClick={() => navigate(loginRoute)}>Login here</Button>
-                </Typography>
-            </Box>
-            {showAlert && (
-                <Box sx={{ position: 'fixed', bottom: 0, left: 0, m: 2 }}>
-                    <Alert severity="success">{alertMessage}</Alert>
-                </Box>
-            )}
-        </Box>
+        <>
+            <Toaster />
+            <section className="relative w-screen h-screen overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center filter blur-sm brightness-50"
+                     style={{backgroundImage: `url(${loginbg})`}}></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-7/8 max-h-svh w-11/12 max-w-xl p-8 bg-white rounded-lg shadow-lg overflow-y-auto">
+                        <img src={logotrans} alt="logo" className="w-24 h-24 mb-4"/>
+                        <header className="mb-4">
+                            <h1 className="text-2xl font-bold text-black">{title}</h1>
+                        </header>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)}
+                                  className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Name</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Name" {...field} className="w-full h-12"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="username"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Username</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Username" {...field} className="w-full h-12"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Password</FormLabel>
+                                            <FormControl>
+                                                <Input type="password" placeholder="Password" {...field}
+                                                       className="w-full h-12"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Confirm Password</FormLabel>
+                                            <FormControl>
+                                                <Input type="password" placeholder="Confirm Password" {...field}
+                                                       className="w-full h-12"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Email Address</FormLabel>
+                                            <FormControl>
+                                                <Input type="email" placeholder="Email Address" {...field}
+                                                       className="w-full h-12"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="phoneNumber"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Phone Number</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Phone Number" {...field} className="w-full h-12"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="address"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Address</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Address" {...field} className="w-full h-12"/>
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex items-center col-span-1 md:col-span-2">
+                                    <input type="checkbox" id="terms" required className="mr-2"/>
+                                    <label htmlFor="terms" className="text-black">Agree to Terms and Conditions</label>
+                                </div>
+                                <Button type="submit" className="w-full col-span-1 md:col-span-2">Register</Button>
+                            </form>
+                        </Form>
+                        <p className="mt-4 text-black text-center">
+                            Already have an account? <Link to={loginRoute} className="text-black">Log in here</Link>
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </>
     );
 };
 

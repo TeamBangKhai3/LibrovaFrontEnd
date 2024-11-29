@@ -1,10 +1,10 @@
-PublisherProductView.css
-.scrollable-content {
-    overflow-y: scroll;
+/* BookCarousel.css */
+.carousel-container {
+    overflow-x: scroll;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
 
-.scrollable-content::-webkit-scrollbar {
+.carousel-container::-webkit-scrollbar {
     display: none;  /* Safari and Chrome */
 }
