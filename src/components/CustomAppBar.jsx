@@ -306,7 +306,7 @@ const CustomAppBar = ({
                                             variant="ghost" 
                                             size="sm"
                                             className="gap-2 text-muted-foreground hover:text-primary"
-                                            onClick={() => handleNavigate('/cart')}
+                                            onClick={() => handleNavigate('/user/checkout')}
                                         >
                                             <ShoppingBag className="h-4 w-4" />
                                             View Cart
@@ -391,7 +391,7 @@ const CustomAppBar = ({
                                                 <p className="font-medium">{cartItems.length}</p>
                                             </div>
                                             <Button 
-                                                onClick={() => handleNavigate('/checkout')}
+                                                onClick={() => handleNavigate('/user/checkout')}
                                             >
                                                 Checkout
                                             </Button>

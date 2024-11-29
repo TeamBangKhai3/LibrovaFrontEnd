@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8ab60e78-39c5-4cdd-b842-e0849ebe99bf" name="Changes" comment="gihakot man ni brian ang rewrite oi (akoy nagtrabaho sa backend sir ha)&#10;- add new book&#10;- actual book form&#10;- ambot basta daghan na" />
+    <list default="true" id="8ab60e78-39c5-4cdd-b842-e0849ebe99bf" name="Changes" comment="nganong nabilin ni???">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -49,23 +51,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;npm.dev --- --host.executor&quot;: &quot;Run&quot;,
-    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;N:\\Dev-Stuff\\Jetbrains\\Programs\\WebStorm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.codeium.enabled": "true",
+    "ignore.virus.scanning.warn.message": "true",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "npm.dev --- --host.executor": "Run",
+    "npm.dev.executor": "Run",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "N:\\Dev-Stuff\\Jetbrains\\Programs\\WebStorm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\Thunder\LibrovaFrontEnd" />
@@ -138,6 +141,8 @@
       <workItem from="1732785224005" duration="190000" />
       <workItem from="1732870899067" duration="1256000" />
       <workItem from="1732874213521" duration="1823000" />
+      <workItem from="1732876079008" duration="1902000" />
+      <workItem from="1732878053463" duration="460000" />
     </task>
     <task id="LOCAL-00001" summary="Things Added:&#10;- Login/Register&#10;- No backend though :&lt;">
       <option name="closed" value="true" />
@@ -275,7 +280,23 @@
       <option name="project" value="LOCAL" />
       <updated>1732875351822</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="nabilin ang gitignore">
+      <option name="closed" value="true" />
+      <created>1732876145017</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1732876145017</updated>
+    </task>
+    <task id="LOCAL-00019" summary="nganong nabilin ni???">
+      <option name="closed" value="true" />
+      <created>1732876225955</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1732876225955</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -321,6 +342,8 @@
     <MESSAGE value="Things Changed:&#10;    -Some layout things have to be fixed, pero the product view is lookin good!!!" />
     <MESSAGE value="Things Changed:&#10;    - Still has problems with alert dialog&#10;    - But still is working mostly..." />
     <MESSAGE value="gihakot man ni brian ang rewrite oi (akoy nagtrabaho sa backend sir ha)&#10;- add new book&#10;- actual book form&#10;- ambot basta daghan na" />
-    <option name="LAST_COMMIT_MESSAGE" value="gihakot man ni brian ang rewrite oi (akoy nagtrabaho sa backend sir ha)&#10;- add new book&#10;- actual book form&#10;- ambot basta daghan na" />
+    <MESSAGE value="nabilin ang gitignore" />
+    <MESSAGE value="nganong nabilin ni???" />
+    <option name="LAST_COMMIT_MESSAGE" value="nganong nabilin ni???" />
   </component>
 </project>
