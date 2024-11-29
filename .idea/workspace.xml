@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8ab60e78-39c5-4cdd-b842-e0849ebe99bf" name="Changes" comment="gihakot man ni brian ang rewrite oi (akoy nagtrabaho sa backend sir ha)&#10;- add new book&#10;- actual book form&#10;- ambot basta daghan na" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JSX File" />
+        <option value="CSS File" />
+        <option value="JavaScript File" />
+        <option value="tsconfig.json" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="shadcn-rewrite" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;briangwapo81&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/TeamBangKhai3/LibrovaFrontEnd.git&quot;,
+    &quot;accountId&quot;: &quot;41a2b9af-2b5e-4a40-a1aa-12d3d821a645&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2nkbQ3i8NNEGTpAln90z0SemlRj" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.dev --- --host.executor&quot;: &quot;Run&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;N:\\Dev-Stuff\\Jetbrains\\Programs\\WebStorm\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Thunder\LibrovaFrontEnd" />
+      <recent name="C:\Users\Thunder\LibrovaFrontEnd\src\components" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="dev --- --host" type="js.build_tools.npm" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <arguments value="--- --host" />
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-410509235cf1-JavaScript-WS-242.20224.342" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8ab60e78-39c5-4cdd-b842-e0849ebe99bf" name="Changes" comment="" />
+      <created>1729520001647</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1729520001647</updated>
+      <workItem from="1729520002779" duration="135000" />
+      <workItem from="1729520142857" duration="238000" />
+      <workItem from="1729520444036" duration="635000" />
+      <workItem from="1729567772164" duration="23938000" />
+      <workItem from="1729668886762" duration="12008000" />
+      <workItem from="1729694170848" duration="1012000" />
+      <workItem from="1729750270019" duration="601000" />
+      <workItem from="1729835987004" duration="2967000" />
+      <workItem from="1729849988651" duration="2375000" />
+      <workItem from="1729876846603" duration="11870000" />
+      <workItem from="1729890299869" duration="359000" />
+      <workItem from="1729917785003" duration="4193000" />
+      <workItem from="1729928712453" duration="20446000" />
+      <workItem from="1729965636967" duration="18243000" />
+      <workItem from="1730077976061" duration="8877000" />
+      <workItem from="1730098219629" duration="978000" />
+      <workItem from="1730187862638" duration="1295000" />
+      <workItem from="1730281982316" duration="1293000" />
+      <workItem from="1730295872560" duration="598000" />
+      <workItem from="1730658587705" duration="713000" />
+      <workItem from="1730659777780" duration="46000" />
+      <workItem from="1730681965931" duration="6081000" />
+      <workItem from="1730904594058" duration="336000" />
+      <workItem from="1731504648546" duration="19075000" />
+      <workItem from="1731543321186" duration="1046000" />
+      <workItem from="1731544393442" duration="3471000" />
+      <workItem from="1731584575827" duration="21231000" />
+      <workItem from="1731647874321" duration="11288000" />
+      <workItem from="1731893821984" duration="1908000" />
+      <workItem from="1731895763379" duration="7305000" />
+      <workItem from="1731912321568" duration="399000" />
+      <workItem from="1731977980725" duration="5000" />
+      <workItem from="1732129802729" duration="173000" />
+      <workItem from="1732515994562" duration="1858000" />
+      <workItem from="1732673965801" duration="168000" />
+      <workItem from="1732785224005" duration="190000" />
+      <workItem from="1732870899067" duration="1256000" />
+      <workItem from="1732874213521" duration="1823000" />
+    </task>
+    <task id="LOCAL-00001" summary="Things Added:&#10;- Login/Register&#10;- No backend though :&lt;">
+      <option name="closed" value="true" />
+      <created>1729520637997</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1729520637997</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Things Added:&#10;- Login/Register&#10;- No backend though :&lt;">
+      <option name="closed" value="true" />
+      <created>1729520797564</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1729520797564</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Things Added:&#10;- Homepage (User)&#10;- No backend though :&lt;&#10;- Made the Appbar perfect lol (Still no backend...)">
+      <option name="closed" value="true" />
+      <created>1729606175988</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1729606175988</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Things Added:&#10;- Account Information&#10;- Edge cases aren't implemented yet...&#10;- as long as CRUD works fuck u MWAHAHAHAHA">
+      <option name="closed" value="true" />
+      <created>1729678023048</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1729678023048</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Things Added:&#10;  - Everything Refactored&#10;  - Good Stuff added&#10;  - Publisher is Completed (But broken back-end (FUCK U MATT!!! BWAHAHHA))&#10;  - Reusability is on the table, Hooray&#10;  - Added New Bugs&#10;  - (Wanna Break from the ads)&#10;  - (Domain Expansion MWAHAHAHA)">
+      <option name="closed" value="true" />
+      <created>1729890509407</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1729890509407</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Things Added:&#10;  - A ton...&#10;  - Just check the Commit Logs...">
+      <option name="closed" value="true" />
+      <created>1729992501690</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1729992501690</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Things Added:&#10;  - Paking shyet&#10;  - Madapaking shyet&#10;  - Whatever disz shyet&#10;  - TBH idunno this shyet">
+      <option name="closed" value="true" />
+      <created>1731522690143</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1731522690144</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Things Added:&#10;  - Paking shyet&#10;  - Madapaking shyet&#10;  - Whatever disz shyet&#10;  - TBH idunno this shyet">
+      <option name="closed" value="true" />
+      <created>1731522716781</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1731522716781</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Things Added:&#10;    - Hotfixes and Bug squashing&#10;    - But at the cost of Adding more...">
+      <option name="closed" value="true" />
+      <created>1731544897433</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1731544897433</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Things Added:&#10;    - Favicon addition&#10;    - Title&#10;    - Bugs">
+      <option name="closed" value="true" />
+      <created>1731548782260</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1731548782260</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Things Added:&#10;    - Favicon addition&#10;    - Title&#10;    - Bugs">
+      <option name="closed" value="true" />
+      <created>1731584927513</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1731584927513</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Things Changed:&#10;    -ShadCN installed">
+      <option name="closed" value="true" />
+      <created>1731586425876</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1731586425876</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Things Changed:&#10;    -Refactored some magic crap really, don't know, don't care...">
+      <option name="closed" value="true" />
+      <created>1731651396801</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1731651396801</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Things Changed:&#10;    -Some layout things have to be fixed, pero the product view is lookin good!!!">
+      <option name="closed" value="true" />
+      <created>1731659903024</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1731659903024</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Things Changed:&#10;    - Still has problems with alert dialog&#10;    - But still is working mostly...">
+      <option name="closed" value="true" />
+      <created>1731894493527</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1731894493527</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Things Changed:&#10;    - Still has problems with alert dialog&#10;    - But still is working mostly...">
+      <option name="closed" value="true" />
+      <created>1732129847638</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1732129847638</updated>
+    </task>
+    <task id="LOCAL-00017" summary="gihakot man ni brian ang rewrite oi (akoy nagtrabaho sa backend sir ha)&#10;- add new book&#10;- actual book form&#10;- ambot basta daghan na">
+      <option name="closed" value="true" />
+      <created>1732875351822</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1732875351822</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="shadcn-rewrite" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Things Added:&#10;- Login/Register&#10;- No backend though :&lt;" />
+    <MESSAGE value="Things Added:&#10;- Homepage (User)&#10;- No backend though :&lt;&#10;- Made the Appbar perfect lol (Still no backend...)" />
+    <MESSAGE value="Things Added:&#10;- Account Information&#10;- Edge cases aren't implemented yet...&#10;- as long as CRUD works fuck u MWAHAHAHAHA" />
+    <MESSAGE value="Things Added:&#10;  - Everything Refactored&#10;  - Good Stuff added&#10;  - Publisher is Completed (But broken back-end (FUCK U MATT!!! BWAHAHHA))&#10;  - Reusability is on the table, Hooray&#10;  - Added New Bugs&#10;  - (Wanna Break from the ads)&#10;  - (Domain Expansion MWAHAHAHA)" />
+    <MESSAGE value="Things Added:&#10;  - A ton...&#10;  - Just check the Commit Logs..." />
+    <MESSAGE value="Things Added:&#10;  - some shit tweaks" />
+    <MESSAGE value="Things Added:&#10;  - Doing this before nuking everything..." />
+    <MESSAGE value="Things Added:&#10;  - Paking shyet&#10;  - Madapaking shyet&#10;  - Whatever disz shyet&#10;  - TBH idunno this shyet" />
+    <MESSAGE value="Things Added:&#10;    - Hotfixes and Bug squashing&#10;    - But at the cost of Adding more..." />
+    <MESSAGE value="Things Added:&#10;    - Favicon addition&#10;    - Title&#10;    - Bugs" />
+    <MESSAGE value="Things Changed:&#10;    -ShadCN installed" />
+    <MESSAGE value="Things Changed:&#10;    -Used alot of ShadCN stuff, but I am dumb so I don't even know what is up..." />
+    <MESSAGE value="Things Changed:&#10;    -Refactored some magic crap really, don't know, don't care..." />
+    <MESSAGE value="Things Changed:&#10;    -Some layout things have to be fixed, pero the product view is lookin good!!!" />
+    <MESSAGE value="Things Changed:&#10;    - Still has problems with alert dialog&#10;    - But still is working mostly..." />
+    <MESSAGE value="gihakot man ni brian ang rewrite oi (akoy nagtrabaho sa backend sir ha)&#10;- add new book&#10;- actual book form&#10;- ambot basta daghan na" />
+    <option name="LAST_COMMIT_MESSAGE" value="gihakot man ni brian ang rewrite oi (akoy nagtrabaho sa backend sir ha)&#10;- add new book&#10;- actual book form&#10;- ambot basta daghan na" />
+  </component>
+</project>
