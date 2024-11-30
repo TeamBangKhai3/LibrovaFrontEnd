@@ -76,7 +76,6 @@ const CustomAppBar = ({
         { icon: Grid, label: 'Categories', path: isLandingPage ? '/user/login' : '/user/categories' }
     ] : [
         { icon: Home, label: 'Home', path: homeRoute },
-        { icon: BookOpen, label: 'My Books', path: '/mybooks' },
         { icon: Grid, label: 'Add Book', path: '/publisher/addebook' },
         { icon: Grid, label: 'Analytics', path: '/analytics' }
     ];
