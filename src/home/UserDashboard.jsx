@@ -17,11 +17,10 @@ export default function UserDashboard() {
 
     return (
         <Box sx={{ 
-            height: '100svh',
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden'
+            height: '100%'
         }}>
             <CustomAppBar
                 userInfoEndpoint={`${backendUrl}/users/getuserinfo`}

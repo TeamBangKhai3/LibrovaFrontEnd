@@ -48,7 +48,8 @@ const CustomAppBar = ({
     homeRoute = '/home',
     accountSettingRoute = '/accountsetting',
     className = "",
-    userType = 1
+    userType = 1,
+    isLandingPage = false
 }) => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -69,10 +70,10 @@ const CustomAppBar = ({
     const isUser = userType === 1;
 
     const navigationItems = isUser ? [
-        { icon: Home, label: 'Home', path: homeRoute },
-        { icon: BookOpen, label: 'Books', path: '/user/books' },
-        { icon: Bookmark, label: 'Bookmarks', path: '/user/bookmarks' },
-        { icon: Grid, label: 'Categories', path: '/categories' }
+        { icon: Home, label: 'Home', path: isLandingPage ? '/user/login' : homeRoute },
+        { icon: BookOpen, label: 'Books', path: isLandingPage ? '/user/login' : '/user/books' },
+        { icon: Bookmark, label: 'Bookmarks', path: isLandingPage ? '/user/login' : '/user/bookmarks' },
+        { icon: Grid, label: 'Categories', path: isLandingPage ? '/user/login' : '/categories' }
     ] : [
         { icon: Home, label: 'Home', path: homeRoute },
         { icon: BookOpen, label: 'My Books', path: '/mybooks' },
@@ -279,7 +280,7 @@ const CustomAppBar = ({
                     <Button 
                         variant="ghost" 
                         className="hidden md:flex items-center space-x-2 p-0"
-                        onClick={() => handleNavigate(homeRoute)}
+                        onClick={() => handleNavigate(isLandingPage ? "/" : homeRoute)}
                     >
                         <img 
                             src={Logo} 
@@ -409,7 +410,7 @@ const CustomAppBar = ({
 
                 <div className="flex items-center space-x-4 pr-4">
                     {/* Cart Button with Popover - Only shown for users */}
-                    {isUser && (
+                    {isUser && !isLandingPage && (
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button 
