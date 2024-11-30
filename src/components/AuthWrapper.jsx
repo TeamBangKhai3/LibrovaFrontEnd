@@ -59,7 +59,7 @@ const AuthWrapper = ({ children }) => {
   }, [navigate, location.pathname, backendUrl]);
 
   if (isChecking) {
-    return null; // or a loading spinner
+    return <div>Loading...</div>; 
   }
 
   return children;
