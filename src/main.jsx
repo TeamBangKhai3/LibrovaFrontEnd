@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import './index.css'
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import UsrLogin from './forms/UserLogin.jsx'
 import UsrRegister from './forms/UserRegister.jsx'
@@ -23,6 +23,7 @@ import ReadBook from "./pages/ReadBook.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import BooksPage from "./pages/BooksPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
+import AnalyticsPage from "./pages/AnalyticsPage.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
@@ -46,6 +47,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/publisher/home" element={<PublisherDashboard/>} />
                 <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
                 <Route path="/publisher/addebook" element={<PublisherAddBook/>} />
+                <Route path="/publisher/analytics" element={<AnalyticsPage />} />
                 <Route path="publisher/home/ebookinfo/:id" element={<PublisherProductView/>} />
                 <Route path="publisher/home/ebookinfo/editinfo/:id" element={<EditBook/>} />
             </Routes>

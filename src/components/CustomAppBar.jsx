@@ -77,7 +77,7 @@ const CustomAppBar = ({
     ] : [
         { icon: Home, label: 'Home', path: homeRoute },
         { icon: Grid, label: 'Add Book', path: '/publisher/addebook' },
-        { icon: Grid, label: 'Analytics', path: '/analytics' }
+        { icon: Grid, label: 'Analytics', path: '/publisher/analytics' }
     ];
 
     useEffect(() => {
@@ -547,7 +547,9 @@ const CustomAppBar = ({
                                         variant="ghost" 
                                         className="flex items-center space-x-4 h-auto px-2 hover:bg-accent hover:text-accent-foreground"
                                     >
-                                        <span className="hidden md:inline text-sm">Hello, {userInfo.name.split(' ')[0]}</span>
+                                        <span className="hidden md:inline text-sm">
+                                            {userInfo?.name ? `Hello, ${userInfo.name.split(' ')[0]}` : 'Hello'}
+                                        </span>
                                         <Avatar className="h-8 w-8">
                                             <AvatarImage 
                                                 src={userInfo.avatar ? `data:image/jpeg;base64,${userInfo.avatar}` : null}
