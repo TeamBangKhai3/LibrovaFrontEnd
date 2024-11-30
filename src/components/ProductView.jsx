@@ -613,7 +613,7 @@ export default function ProductView({
                                                     className="w-full"
                                                     onClick={() => navigate(`/user/read/${id}`)}
                                                 >
-                                                    Read Ebook
+                                                    Read eBook
                                                 </Button>
                                                 <Button
                                                     className="w-full"
@@ -725,174 +725,179 @@ export default function ProductView({
                                             </div>
                                         </div>
 
-                                        {userType === 1 && (
-                                            <Card className="mb-6">
-                                                <CardContent className="p-4">
-                                                    <div className="space-y-4">
+                                        {book.owned && userType === 1 && (
+                                            <div className="mt-8">
+                                                <h3 className="text-xl font-semibold mb-4">Your Review</h3>
+                                                
+                                                {/* Review Editor */}
+                                                {isEditingReview ? (
+                                                    <div className="mb-6 space-y-4">
                                                         <div className="flex items-start gap-4">
-                                                            <Avatar className="w-10 h-10">
+                                                            <Avatar>
                                                                 <AvatarImage
                                                                     src={currentUserInfo?.avatar ? `data:image/png;base64,${currentUserInfo.avatar}` : ''}
-                                                                    alt={currentUserInfo?.name}
+                                                                    alt={currentUserInfo?.name || 'User'}
                                                                 />
                                                                 <AvatarFallback>
-                                                                    {currentUserInfo?.name?.charAt(0) || 'U'}
+                                                                    {currentUserInfo?.name?.charAt(0).toUpperCase() || 'U'}
                                                                 </AvatarFallback>
                                                             </Avatar>
-                                                            <div className="flex-1">
-                                                                <h3 className="font-semibold">
-                                                                    {currentUserInfo?.name || 'User'}
-                                                                </h3>
-                                                                {(!userReview && !isEditingReview) ? (
-                                                                    <>
-                                                                        <Rating
-                                                                            value={newRating}
-                                                                            onChange={setNewRating}
-                                                                        />
-                                                                        <Textarea
-                                                                            value={newReviewText}
-                                                                            onChange={(e) => setNewReviewText(e.target.value)}
-                                                                            placeholder="Write your review..."
-                                                                            className="mt-2"
-                                                                        />
-                                                                        <div className="flex justify-end gap-2 mt-2">
-                                                                            <Button
-                                                                                onClick={handleReviewSubmit}
-                                                                                disabled={!newReviewText || newRating === 0 || isSubmitting}
-                                                                            >
-                                                                                {isSubmitting && (
-                                                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                                )}
-                                                                                Post Review
-                                                                            </Button>
-                                                                        </div>
-                                                                    </>
-                                                                ) : isEditingReview ? (
-                                                                    <>
-                                                                        <Rating
-                                                                            value={newRating}
-                                                                            onChange={setNewRating}
-                                                                        />
-                                                                        <Textarea
-                                                                            value={newReviewText}
-                                                                            onChange={(e) => setNewReviewText(e.target.value)}
-                                                                            placeholder="Write your review..."
-                                                                            className="mt-2"
-                                                                        />
-                                                                        <div className="flex justify-end gap-2 mt-2">
-                                                                            <Button
-                                                                                variant="outline"
-                                                                                onClick={() => {
-                                                                                    setIsEditingReview(false);
-                                                                                    setNewReviewText(userReview.reviewText);
-                                                                                    setNewRating(userReview.rating);
-                                                                                }}
-                                                                                disabled={isUpdating}
-                                                                            >
-                                                                                Cancel
-                                                                            </Button>
-                                                                            <Button
-                                                                                onClick={handleReviewUpdate}
-                                                                                disabled={!newReviewText || newRating === 0 || isUpdating}
-                                                                            >
-                                                                                {isUpdating && (
-                                                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                                )}
-                                                                                Update Review
-                                                                            </Button>
-                                                                        </div>
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <Rating
-                                                                            value={userReview.rating}
-                                                                            readonly
-                                                                        />
-                                                                        <p className="mt-2">{userReview.reviewText}</p>
-                                                                        <div className="flex justify-end gap-2 mt-2">
-                                                                            <Button
-                                                                                variant="outline"
-                                                                                onClick={() => {
-                                                                                    setIsEditingReview(true);
-                                                                                    setNewReviewText(userReview.reviewText);
-                                                                                    setNewRating(userReview.rating);
-                                                                                }}
-                                                                                disabled={isUpdating}
-                                                                            >
-                                                                                Edit
-                                                                            </Button>
-                                                                            <AlertDialog>
-                                                                                <AlertDialogTrigger asChild>
-                                                                                    <Button variant="destructive">Delete</Button>
-                                                                                </AlertDialogTrigger>
-                                                                                <AlertDialogContent>
-                                                                                    <AlertDialogHeader>
-                                                                                        <AlertDialogTitle>Delete Review?</AlertDialogTitle>
-                                                                                        <AlertDialogDescription>
-                                                                                            This action cannot be undone.
-                                                                                        </AlertDialogDescription>
-                                                                                    </AlertDialogHeader>
-                                                                                    <AlertDialogFooter>
-                                                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                                        <AlertDialogAction
-                                                                                            onClick={handleReviewDelete}
-                                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                                                            disabled={isDeletingReview}
-                                                                                        >
-                                                                                            {isDeletingReview && (
-                                                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                                            )}
-                                                                                            Delete
-                                                                                        </AlertDialogAction>
-                                                                                    </AlertDialogFooter>
-                                                                                </AlertDialogContent>
-                                                                            </AlertDialog>
-                                                                        </div>
-                                                                    </>
-                                                                )}
+                                                            <div className="flex-1 space-y-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Rating value={newRating} onChange={setNewRating} />
+                                                                    <span className="text-sm text-muted-foreground">
+                                                                        {newRating} out of 5 stars
+                                                                    </span>
+                                                                </div>
+                                                                <Textarea
+                                                                    value={newReviewText}
+                                                                    onChange={(e) => setNewReviewText(e.target.value)}
+                                                                    placeholder="Write your review..."
+                                                                    className="min-h-[100px]"
+                                                                />
+                                                                <div className="flex gap-2">
+                                                                    <Button 
+                                                                        onClick={userReview ? handleReviewUpdate : handleReviewSubmit}
+                                                                        disabled={isSubmitting || isUpdating}
+                                                                    >
+                                                                        {(isSubmitting || isUpdating) ? (
+                                                                            <>
+                                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                                {userReview ? 'Updating...' : 'Saving...'}
+                                                                            </>
+                                                                        ) : (
+                                                                            userReview ? 'Update Review' : 'Save Review'
+                                                                        )}
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        onClick={() => {
+                                                                            setIsEditingReview(false);
+                                                                            setNewReviewText(userReview?.reviewText || "");
+                                                                            setNewRating(userReview?.rating || 0);
+                                                                        }}
+                                                                    >
+                                                                        Cancel
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </CardContent>
-                                            </Card>
-                                        )}
-
-                                        <ScrollArea className="h-[400px] pr-4">
-                                            {reviews.filter(review => !userReview || review.reviewID !== userReview.reviewID).map((review) => (
-                                                <Card key={review.reviewID} className="mb-4">
-                                                    <CardContent className="p-4">
+                                                ) : userReview ? (
+                                                    <div className="mb-6">
                                                         <div className="flex items-start gap-4">
-                                                            <Avatar className="w-10 h-10">
+                                                            <Avatar>
                                                                 <AvatarImage
-                                                                    src={review.user.avatar ? `data:image/png;base64,${review.user.avatar}` : ''}
-                                                                    alt={review.user.name}
+                                                                    src={currentUserInfo?.avatar ? `data:image/png;base64,${currentUserInfo.avatar}` : ''}
+                                                                    alt={currentUserInfo?.name || 'User'}
                                                                 />
                                                                 <AvatarFallback>
-                                                                    {review.user.name?.charAt(0) || 'U'}
+                                                                    {currentUserInfo?.name?.charAt(0).toUpperCase() || 'U'}
                                                                 </AvatarFallback>
                                                             </Avatar>
-                                                            <div className="flex-1">
-                                                                <div className="flex justify-between items-start">
-                                                                    <div>
-                                                                        <h3 className="font-semibold">{review.user.name}</h3>
-                                                                        <Rating value={review.rating} readonly />
-                                                                    </div>
+                                                            <div className="flex-1 space-y-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Rating value={userReview.rating} readonly />
                                                                     <span className="text-sm text-muted-foreground">
-                                                                        {format(new Date(review.date), 'MMM d, yyyy')}
+                                                                        {userReview.rating} out of 5 stars
                                                                     </span>
                                                                 </div>
-                                                                <p className="mt-2">{review.reviewText}</p>
+                                                                <p className="text-sm">{userReview.reviewText}</p>
+                                                                <div className="flex gap-2">
+                                                                    <Button onClick={() => {
+                                                                        setNewReviewText(userReview.reviewText);
+                                                                        setNewRating(userReview.rating);
+                                                                        setIsEditingReview(true);
+                                                                    }}>
+                                                                        Edit Review
+                                                                    </Button>
+                                                                    <AlertDialog>
+                                                                        <AlertDialogTrigger asChild>
+                                                                            <Button
+                                                                                variant="destructive"
+                                                                                disabled={isDeletingReview}
+                                                                            >
+                                                                                {isDeletingReview ? (
+                                                                                    <>
+                                                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                                        Deleting...
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                                                        Delete Review
+                                                                                    </>
+                                                                                )}
+                                                                            </Button>
+                                                                        </AlertDialogTrigger>
+                                                                        <AlertDialogContent>
+                                                                            <AlertDialogHeader>
+                                                                                <AlertDialogTitle>Delete Review</AlertDialogTitle>
+                                                                                <AlertDialogDescription>
+                                                                                    Are you sure you want to delete your review? This action cannot be undone.
+                                                                                </AlertDialogDescription>
+                                                                            </AlertDialogHeader>
+                                                                            <AlertDialogFooter>
+                                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                                <AlertDialogAction
+                                                                                    onClick={handleReviewDelete}
+                                                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                                >
+                                                                                    Delete Review
+                                                                                </AlertDialogAction>
+                                                                            </AlertDialogFooter>
+                                                                        </AlertDialogContent>
+                                                                    </AlertDialog>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </CardContent>
-                                                </Card>
-                                            ))}
-                                            {reviews.length === 0 && (
-                                                <div className="text-center py-8 text-muted-foreground">
-                                                    No reviews yet. Be the first to review this book!
-                                                </div>
+                                                    </div>
+                                                ) : (
+                                                    <Button
+                                                        className="mb-6"
+                                                        onClick={() => setIsEditingReview(true)}
+                                                    >
+                                                        Write a Review
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Other Reviews */}
+                                        <div className="space-y-6">
+                                            {reviews.length > 0 ? (
+                                                reviews.map((review) => (
+                                                    <div key={review.reviewID} className="space-y-2">
+                                                        <div className="flex items-center gap-4">
+                                                            <Avatar>
+                                                                <AvatarImage
+                                                                    src={review.user?.avatar ? `data:image/png;base64,${review.user.avatar}` : ''}
+                                                                    alt={review.user?.name || 'User'}
+                                                                />
+                                                                <AvatarFallback>
+                                                                    {review.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div>
+                                                                <div className="font-semibold">{review.user?.name || 'Anonymous'}</div>
+                                                                <div className="text-sm text-muted-foreground">
+                                                                    {format(new Date(review.date), 'PPP')}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Rating value={review.rating} readonly />
+                                                            <span className="text-sm text-muted-foreground">
+                                                                {review.rating} out of 5 stars
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm">{review.reviewText}</p>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-muted-foreground">No reviews yet.</p>
                                             )}
-                                        </ScrollArea>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </div>

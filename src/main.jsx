@@ -9,6 +9,7 @@ import UserDashboard from "./home/UserDashboard.jsx";
 import UserAccountSetting from "./home/UserAccountSetting.jsx";
 import BookmarksPage from "./pages/BookmarksPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
+import CategoriesPage from './pages/CategoriesPage'
 
 import PublisherDashboard from "./home/PublisherDashboard.jsx";
 import PublisherLogin from  "./forms/PublisherLogin.jsx";
@@ -35,6 +36,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/user/books" element={<BooksPage/>} />
                 <Route path="/user/search" element={<SearchPage />} />
                 <Route path="/user/bookmarks" element={<BookmarksPage />} />
+                <Route path="/user/categories" element={<CategoriesPage />} />
                 <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
                 <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
                 <Route path="user/read/:id" element={<ReadBook />} />

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from "@mui/material";
 import CustomAppBar from '../components/CustomAppBar';
 import CustomBreadcrumbs from '../components/CustomBreadcrumbs';
-import BookCarousel from '../components/BookCarousel'; 
+import BookRecommendations from '../components/BookRecommendations';
 import { useNavigate } from 'react-router-dom';
 
 export default function UserDashboard() {
@@ -48,13 +48,11 @@ export default function UserDashboard() {
                 />
                 
                 <Box sx={{ px: 3, py: 2 }}>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                        Books to Read
+                    <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4 }}>
+                        Welcome to Librova
                     </Typography>
-                </Box>
 
-                <Box sx={{ width: '100%' }}>
-                    <BookCarousel />
+                    <BookRecommendations />
                 </Box>
             </Box>
         </Box>
