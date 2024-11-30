@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from "@mui/material";
 import CustomAppBar from '../components/CustomAppBar';
 import CustomBreadcrumbs from '../components/CustomBreadcrumbs';
-import BookCarousel from '../components/BookCarousel'; // Import the BookCarousel component
+import BookCarousel from '../components/BookCarousel'; 
 import { useNavigate } from 'react-router-dom';
 
 export default function UserDashboard() {
@@ -13,14 +13,16 @@ export default function UserDashboard() {
 
     const breadcrumbLinks = [
         { label: 'User', path: '/user/home' },
+        { label: 'Home', path: '/user/home' },
     ];
 
     return (
         <Box sx={{ 
+            height: '100svh',
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%'
+            overflow: 'hidden'
         }}>
             <CustomAppBar
                 userInfoEndpoint={`${backendUrl}/users/getuserinfo`}

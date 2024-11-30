@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Library, Users } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import Footer from "@/components/Footer"
 import { Skeleton } from "@/components/ui/skeleton"
 import CustomAppBar from "@/components/CustomAppBar"
 
@@ -36,7 +37,7 @@ const LandingPage = () => {
   }, [backendUrl])
 
   return (
-    <div className="flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-auto">
       <CustomAppBar
         userInfoEndpoint={`${backendUrl}/users/getuserinfo`}
         loginRoute="/user/login"
@@ -47,7 +48,7 @@ const LandingPage = () => {
       />
       
       {/* Hero Section */}
-      <main className="flex-grow">
+      <main className="flex-1">
         <section className="relative bg-background pt-16 md:pt-24">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col items-center text-center space-y-8 md:space-y-12 mx-auto max-w-5xl">
@@ -230,6 +231,8 @@ const LandingPage = () => {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   )
 }

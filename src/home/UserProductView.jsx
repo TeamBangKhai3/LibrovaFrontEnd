@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductView from '../components/ProductView';
 import { toast, Toaster } from "sonner";
@@ -35,8 +35,6 @@ export default function UserProductView() {
 
             if (response.status === 200) {
                 toast.success("Product added to cart successfully!");
-
-                // Trigger a custom event to refresh the cart
                 window.dispatchEvent(new CustomEvent('refreshCart'));
             }
         } catch (error) {
@@ -51,9 +49,32 @@ export default function UserProductView() {
         }
     };
 
-    const handleBuyNow = (id) => {
-        // Buy now logic here
-        console.log(`Buy now: ${id}`);
+    const handleBuyNow = async (id) => {
+        try {
+            const token = localStorage.getItem('sessionToken');
+            
+            if (!token) {
+                toast.error("Please login to purchase");
+                navigate('/user/login');
+                return;
+            }
+
+            const response = await axios({
+                method: 'post',
+                url: `${backendUrl}/order/addtocart/${id}`,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 200) {
+                navigate('/user/checkout');
+            }
+        } catch (error) {
+            console.error('Error processing purchase:', error);
+            toast.error("Failed to process purchase. Please try again.");
+        }
     };
 
     return (
