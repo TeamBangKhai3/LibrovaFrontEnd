@@ -13,7 +13,8 @@ const BookGrid = ({
     className = "",
     endpoint = '/ebook/getallebooksbypublisher', 
     onAddBookPath = '/publisher/addebook', 
-    onBookClickPath = '/publisher/home/ebookinfo' 
+    onBookClickPath = '/publisher/home/ebookinfo',
+    booksData = null
 }) => {
     const [books, setBooks] = useState([])
     const [loading, setLoading] = useState(true)
@@ -22,6 +23,12 @@ const BookGrid = ({
     const backendUrl = import.meta.env.VITE_BACKEND_URL
 
     useEffect(() => {
+        if (booksData) {
+            setBooks(booksData);
+            setLoading(false);
+            return;
+        }
+
         const fetchBooks = async () => {
             try {
                 const response = await axios.get(`${backendUrl}${endpoint}`, {
@@ -37,7 +44,7 @@ const BookGrid = ({
             }
         }
         fetchBooks()
-    }, [endpoint])
+    }, [endpoint, booksData])
 
     const handleAddBook = () => {
         navigate(onAddBookPath)

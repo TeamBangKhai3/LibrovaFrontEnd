@@ -131,11 +131,11 @@ const EbookReader = ({ bookId }) => {
                 });
 
                 if (response.headers['content-type'] !== 'application/epub+zip') {
-                    throw new Error('Server did not return an epub file');
+                    throw new Error('Oops! The publisher did not add the correct eBook type. Please contact your publisher. Otherwise, this is Matt\'s fault.');
                 }
 
                 if (!response.data || response.data.byteLength === 0) {
-                    throw new Error('No book content found');
+                    throw new Error('Oops! The publisher did not add an eBook for this entry. Please contact your publisher. Otherwise, this is Matt\'s fault.');
                 }
 
                 // Create book instance

@@ -30,6 +30,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import MDEditor from '@uiw/react-md-editor';
+import { useNavigate } from 'react-router-dom';
 
 const MotionCard = motion(Card);
 
@@ -47,7 +48,8 @@ const BookForm = ({
         genre: '',
         price: '',
         cover: '',
-        isbn: ''
+        isbn: '',
+        publishDate: ''
     });
     const [ebookFile, setEbookFile] = useState(null);
     const [hasExistingEbook, setHasExistingEbook] = useState(false);
@@ -74,6 +76,10 @@ const BookForm = ({
                     ]);
 
                     if (bookResponse.data) {
+                        const publishDate = bookResponse.data.publishDate 
+                            ? new Date(bookResponse.data.publishDate).toISOString().split('T')[0]
+                            : '';
+                            
                         setFormData({
                             title: bookResponse.data.title || '',
                             author: bookResponse.data.author || '',
@@ -81,7 +87,8 @@ const BookForm = ({
                             genre: bookResponse.data.genre || '',
                             price: bookResponse.data.price?.toString() || '',
                             cover: bookResponse.data.cover || '',
-                            isbn: bookResponse.data.isbn || ''
+                            isbn: bookResponse.data.isbn || '',
+                            publishDate: publishDate
                         });
                         setCoverPreview(bookResponse.data.cover ? `data:image/jpeg;base64,${bookResponse.data.cover}` : '');
                     }
@@ -92,7 +99,10 @@ const BookForm = ({
                 } catch (error) {
                     console.error('Error fetching book data:', error);
                     if (error.response?.status !== 404) {
-                        toast.error('Failed to load book data');
+                        toast("Error", {
+                            description: "Failed to load book data",
+                            variant: "destructive",
+                        });
                     }
                     setHasExistingEbook(false);
                 }
@@ -123,25 +133,45 @@ const BookForm = ({
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            toast.error("Please upload an image file");
+            toast("Error", {
+                description: "Please upload an image file",
+                variant: "destructive",
+            });
             return;
         }
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64String = reader.result;
-            setCoverPreview(base64String);
-            setFormData(prev => ({
-                ...prev,
-                cover: base64String.split(',')[1]
-            }));
-            toast.success("Cover image uploaded successfully");
-        };
-        reader.onerror = () => {
-            toast.error("Failed to upload cover image");
-        };
-        reader.readAsDataURL(file);
+        const previewUrl = URL.createObjectURL(file);
+        setCoverPreview(previewUrl);
+        setFormData(prev => ({
+            ...prev,
+            cover: file
+        }));
+        toast("Success", {
+            description: "Cover image uploaded successfully",
+            variant: "success",
+        });
     };
+
+    const handleEbookFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.type !== 'application/epub+zip') {
+            toast("Error", {
+                description: "Please upload an EPUB file",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setEbookFile(file);
+        toast("Success", {
+            description: "eBook file selected successfully",
+            variant: "success",
+        });
+    };
+
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -149,64 +179,78 @@ const BookForm = ({
         const sessionToken = localStorage.getItem('sessionToken');
         
         try {
+            const formDataToSend = new FormData();
+            formDataToSend.append('title', formData.title);
+            formDataToSend.append('author', formData.author);
+            formDataToSend.append('description', formData.description);
+            formDataToSend.append('genre', formData.genre);
+            formDataToSend.append('price', formData.price);
+            formDataToSend.append('isbn', formData.isbn);
+
+            // Format the date to match the required format
+            if (formData.publishDate) {
+                formDataToSend.append('publishDate', formData.publishDate);
+            }
+
+            // Add cover if present
+            if (formData.cover instanceof File) {
+                formDataToSend.append('cover', formData.cover);
+            }
+
+            // Add ebook file if present
+            if (ebookFile instanceof File) {
+                formDataToSend.append('ebook', ebookFile);
+            }
+
+            // Add bookId for updates
+            if (mode === 'edit' && bookId) {
+                formDataToSend.append('eBookID', bookId);
+            }
+
             let bookResponse;
             if (mode === 'add') {
-                bookResponse = await axios.post(addEbookEndpoint, formData, {
+                bookResponse = await axios.post(addEbookEndpoint, formDataToSend, {
                     headers: {
-                        'Authorization': `Bearer ${sessionToken}`
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'multipart/form-data'
                     }
                 });
-                toast.success("Book added successfully");
+                toast("Success", {
+                    description: "Book published successfully! Redirecting to home page...",
+                    variant: "success",
+                });
+                setTimeout(() => {
+                    navigate('/publisher/home');
+                }, 2000); // Wait 2 seconds before redirecting
             } else {
-                bookResponse = await axios.put(updateEbookEndpoint, { ...formData, eBookID: bookId }, {
+                bookResponse = await axios.post(updateEbookEndpoint, formDataToSend, {
                     headers: {
-                        'Authorization': `Bearer ${sessionToken}`
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'multipart/form-data'
                     }
                 });
-                toast.success("Book updated successfully");
-            }
-
-            // Handle eBook file upload if present
-            if (ebookFile) {
-                const reader = new FileReader();
-                reader.readAsDataURL(ebookFile);
-                
-                await new Promise((resolve, reject) => {
-                    reader.onload = async () => {
-                        try {
-                            const targetId = mode === 'add' ? bookResponse.data.id : bookId;
-                            const base64String = reader.result.split(',')[1];
-                            
-                            await axios.post(
-                                `${backendUrl}/ebook/uploadebookfile/${targetId}`,
-                                base64String,
-                                {
-                                    headers: {
-                                        'Authorization': `Bearer ${sessionToken}`,
-                                        'Content-Type': 'text/plain'
-                                    }
-                                }
-                            );
-                            toast.success("eBook file uploaded successfully");
-                            resolve();
-                        } catch (error) {
-                            console.error('Error uploading ebook file:', error);
-                            toast.error("Failed to upload eBook file");
-                            reject(error);
-                        }
-                    };
-                    reader.onerror = (error) => {
-                        toast.error("Failed to read eBook file");
-                        reject(error);
-                    };
+                toast("Success", {
+                    description: "Book updated successfully",
+                    variant: "success",
                 });
             }
 
-            if (onSuccess) onSuccess(bookResponse.data);
-        } catch (error) {
-            toast.error(error.response?.data?.message || `Failed to ${mode} book`);
-        } finally {
+            // Clean up preview URL
+            if (coverPreview) {
+                URL.revokeObjectURL(coverPreview);
+            }
+
             setIsLoading(false);
+            if (onSuccess) {
+                onSuccess(bookResponse.data);
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            setIsLoading(false);
+            toast("Error", {
+                description: error.response?.data?.message || "Failed to save book",
+                variant: "destructive",
+            });
         }
     };
 
@@ -218,10 +262,16 @@ const BookForm = ({
                     'Authorization': `Bearer ${sessionToken}`
                 }
             });
-            toast.success("Book deleted successfully");
+            toast("Success", {
+                description: "Book deleted successfully",
+                variant: "success",
+            });
             if (onDelete) onDelete();
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to delete book");
+            toast("Error", {
+                description: error.response?.data?.message || "Failed to delete book",
+                variant: "destructive",
+            });
         }
     };
 
@@ -406,6 +456,17 @@ const BookForm = ({
                                         required
                                     />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="publishDate">Published Date</Label>
+                                    <Input
+                                        id="publishDate"
+                                        name="publishDate"
+                                        type="date"
+                                        value={formData.publishDate}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label>Description</Label>
@@ -429,14 +490,14 @@ const BookForm = ({
                                 )}
                                 <Input
                                     type="file"
-                                    accept=".pdf,.epub"
-                                    onChange={(e) => setEbookFile(e.target.files[0])}
+                                    accept=".epub"
+                                    onChange={handleEbookFileChange}
                                     className="cursor-pointer"
                                 />
                                 <p className="text-sm text-muted-foreground">
                                     {mode === 'edit' && hasExistingEbook
                                         ? 'Upload a new eBook file to replace the existing one'
-                                        : 'Upload your eBook file (PDF or EPUB format)'}
+                                        : 'Upload your eBook file (EPUB only. Matt\'s obessed with it)'}
                                 </p>
                             </div>
                             <div className="flex justify-between items-center">

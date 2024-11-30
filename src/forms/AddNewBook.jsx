@@ -35,7 +35,9 @@ export default function AddNewBook() {
                 data: formData,
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    "Content-Type": "multipart/form-data",
+                    // brian wtf???? json baya
+                    // "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
             });
 

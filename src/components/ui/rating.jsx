@@ -7,23 +7,42 @@ export const Rating = React.forwardRef(function Rating(props, ref) {
     value = 0,
     count = 5,
     readonly = false,
+    onChange,
     className,
     ...rest 
   } = props
 
+  const handleClick = (rating) => {
+    if (!readonly && onChange) {
+      onChange(rating)
+    }
+  }
+
   const hearts = Array.from({ length: count }).map((_, index) => {
-    const filled = index + 1 <= value
-    const halfFilled = !filled && index + 0.5 <= value
+    const rating = index + 1
+    const filled = rating <= value
+    const halfFilled = !filled && rating - 0.5 <= value
 
     return (
-      <Heart
+      <button
         key={index}
+        type="button"
+        onClick={() => handleClick(rating)}
+        disabled={readonly}
         className={cn(
-          "w-5 h-5 transition-colors",
-          filled ? "fill-red-500 text-red-500" : halfFilled ? "fill-red-500/50 text-red-500" : "text-gray-300",
-          className
+          "p-0.5 hover:scale-110 transition-transform",
+          !readonly && "cursor-pointer"
         )}
-      />
+      >
+        <Heart
+          className={cn(
+            "w-5 h-5 transition-colors",
+            filled ? "fill-red-500 text-red-500" : halfFilled ? "fill-red-500/50 text-red-500" : "text-gray-300",
+            !readonly && !filled && "hover:fill-red-200 hover:text-red-200",
+            className
+          )}
+        />
+      </button>
     )
   })
 

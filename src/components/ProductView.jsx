@@ -10,12 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { BookOpen, DollarSign, Hash, Pencil, Trash2, AlertCircle, RefreshCcw, Heart } from 'lucide-react';
+import { BookOpen, DollarSign, Hash, Pencil, Trash2, AlertCircle, RefreshCcw, Heart, Bookmark, BookmarkCheck, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Rating } from "@/components/ui/rating";
 import { MarkdownPreview } from "@/components/ui/markdown-preview";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { format } from "date-fns";
 
 export default function ProductView({
     userType, // 1 for user, 2 for publisher
@@ -35,31 +38,40 @@ export default function ProductView({
     const [title, setTitle] = useState(null);
     const [averageRating, setAverageRating] = useState(0);
     const [reviews, setReviews] = useState([]);
+    const [userReview, setUserReview] = useState(null);
+    const [newReviewText, setNewReviewText] = useState("");
+    const [newRating, setNewRating] = useState(0);
+    const [isEditingReview, setIsEditingReview] = useState(false);
+    const [currentUserInfo, setCurrentUserInfo] = useState(null);
     const [deleting, setDeleting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isInCart, setIsInCart] = useState(false);
     const [orderItemId, setOrderItemId] = useState(null);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [isDeletingReview, setIsDeletingReview] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const navigate = useNavigate();
     const nothing = "No description available please contact the publisher for more information. Thank you! :)";
 
     const fetchData = async () => {
-        console.log('🔍 Starting fetchData for book ID:', id);
+        console.log(' Starting fetchData for book ID:', id);
         setLoading(true);
         setError(null);
         try {
             const sessionToken = localStorage.getItem('sessionToken');
-            console.log('📝 Session Token exists:', !!sessionToken);
-            console.log('👤 User Type:', userType);
+            console.log(' Session Token exists:', !!sessionToken);
+            console.log(' User Type:', userType);
 
             const headers = {
                 'Authorization': `Bearer ${sessionToken}`,
                 'Content-Type': 'application/json'
             };
 
-            console.log('🔒 Request Headers:', headers);
-            console.log('🌐 Making API calls...');
+            console.log(' Request Headers:', headers);
+            console.log(' Making API calls...');
 
             // Always fetch book data, ratings, and reviews
             const apiCalls = [
@@ -70,14 +82,14 @@ export default function ProductView({
 
             // Only fetch cart data for regular users (userType === 1)
             if (userType === 1) {
-                console.log('🛒 Adding cart API call for regular user');
+                console.log(' Adding cart API call for regular user');
                 apiCalls.push(
                     axios.get(`${backendUrl}/order/vieworder`, { headers })
                 );
             }
 
             const responses = await Promise.all(apiCalls);
-            console.log('✅ API Responses:', responses.map(r => ({ status: r.status, url: r.config.url })));
+            console.log(' API Responses:', responses.map(r => ({ status: r.status, url: r.config.url })));
 
             const [bookResponse, ratingResponse, reviewsResponse, ...rest] = responses;
 
@@ -85,9 +97,9 @@ export default function ProductView({
                 throw new Error('Book not found');
             }
 
-            console.log('📚 Book Data:', bookResponse.data);
-            console.log('⭐ Rating:', ratingResponse.data);
-            console.log('💬 Reviews:', reviewsResponse.data);
+            console.log(' Book Data:', bookResponse.data);
+            console.log(' Rating:', ratingResponse.data);
+            console.log(' Reviews:', reviewsResponse.data);
 
             setBook(bookResponse.data);
             setTitle(bookResponse.data.title);
@@ -97,19 +109,19 @@ export default function ProductView({
             // Process cart data only for regular users
             if (userType === 1 && rest.length > 0) {
                 const cartResponse = rest[0];
-                console.log('🛒 Cart Response:', cartResponse.data);
+                console.log(' Cart Response:', cartResponse.data);
                 
                 // Check if book is in cart and store orderItemID if found
                 const cartItems = cartResponse.data.orderItems || [];
-                console.log('🛍️ Cart Items:', cartItems);
-                console.log('🔍 Current Book ID:', id);
-                console.log('📦 Cart Item IDs:', cartItems.map(item => item.eBook.eBookID));
+                console.log(' Cart Items:', cartItems);
+                console.log(' Current Book ID:', id);
+                console.log(' Cart Item IDs:', cartItems.map(item => item.eBook.eBookID));
                 
                 let orderItemToDelete = null;
                 const bookInCart = cartItems.some(item => {
                     const cartBookId = item.eBook.eBookID;
                     const currentBookId = parseInt(id);
-                    console.log('🔄 Comparing:', { cartBookId, currentBookId, matches: cartBookId === currentBookId });
+                    console.log(' Comparing:', { cartBookId, currentBookId, matches: cartBookId === currentBookId });
                     if (cartBookId === currentBookId) {
                         orderItemToDelete = item.orderItemID;
                         return true;
@@ -117,8 +129,8 @@ export default function ProductView({
                     return false;
                 });
 
-                console.log('📌 Is Book in Cart?', bookInCart);
-                console.log('🏷️ Order Item ID to delete:', orderItemToDelete);
+                console.log(' Is Book in Cart?', bookInCart);
+                console.log(' Order Item ID to delete:', orderItemToDelete);
                 setIsInCart(bookInCart);
                 setOrderItemId(orderItemToDelete);
             } else {
@@ -127,7 +139,7 @@ export default function ProductView({
                 setOrderItemId(null);
             }
         } catch (error) {
-            console.error('❌ Error in fetchData:', error);
+            console.error(' Error in fetchData:', error);
             console.error('Error details:', {
                 message: error.message,
                 response: error.response?.data,
@@ -158,16 +170,16 @@ export default function ProductView({
     };
 
     const handleAddToCart = async () => {
-        console.log('🛒 Adding to cart, Book ID:', id);
+        console.log(' Adding to cart, Book ID:', id);
         const sessionToken = localStorage.getItem('sessionToken');
         if (!sessionToken) {
-            console.log('❌ No session token found, redirecting to login');
+            console.log(' No session token found, redirecting to login');
             navigate(loginRoute);
             return;
         }
 
         try {
-            console.log('🌐 Making addToCart API call...');
+            console.log(' Making addToCart API call...');
             const response = await axios.post(
                 `${backendUrl}/order/addtocart/${id}`,
                 {},
@@ -178,9 +190,9 @@ export default function ProductView({
                 }
             );
 
-            console.log('✅ Add to cart response:', response);
+            console.log(' Add to cart response:', response);
             if (response.status === 200) {
-                console.log('📢 Dispatching cartRefresh event');
+                console.log(' Dispatching cartRefresh event');
                 // Get the orderItemID from the response
                 const orderItemID = response.data?.orderItemID;
                 setOrderItemId(orderItemID);
@@ -189,7 +201,7 @@ export default function ProductView({
                 toast.success("Added to cart successfully");
             }
         } catch (error) {
-            console.error('❌ Error adding to cart:', error);
+            console.error(' Error adding to cart:', error);
             console.error('Error details:', {
                 message: error.message,
                 response: error.response?.data,
@@ -200,22 +212,22 @@ export default function ProductView({
     };
 
     const handleDeleteFromCart = async () => {
-        console.log('🗑️ Deleting from cart, Book ID:', id, 'Order Item ID:', orderItemId);
+        console.log(' Deleting from cart, Book ID:', id, 'Order Item ID:', orderItemId);
         const sessionToken = localStorage.getItem('sessionToken');
         if (!sessionToken) {
-            console.log('❌ No session token found, redirecting to login');
+            console.log(' No session token found, redirecting to login');
             navigate(loginRoute);
             return;
         }
 
         if (!orderItemId) {
-            console.error('❌ No orderItemId found for deletion');
+            console.error(' No orderItemId found for deletion');
             toast.error("Cannot delete item: order item ID not found");
             return;
         }
 
         try {
-            console.log('🌐 Making deleteFromCart API call...');
+            console.log(' Making deleteFromCart API call...');
             const response = await axios.delete(
                 `${backendUrl}/order/deletefromcart/${orderItemId}`,
                 {
@@ -225,16 +237,16 @@ export default function ProductView({
                 }
             );
 
-            console.log('✅ Delete from cart response:', response);
+            console.log(' Delete from cart response:', response);
             if (response.status === 200) {
-                console.log('📢 Dispatching cartRefresh event');
+                console.log(' Dispatching cartRefresh event');
                 setIsInCart(false);
                 setOrderItemId(null);
                 window.dispatchEvent(new CustomEvent('cartRefresh'));
                 toast.success("Removed from cart successfully");
             }
         } catch (error) {
-            console.error('❌ Error removing from cart:', error);
+            console.error(' Error removing from cart:', error);
             console.error('Error details:', {
                 message: error.message,
                 response: error.response?.data,
@@ -255,20 +267,208 @@ export default function ProductView({
             // First add to cart
             await handleAddToCart();
             // Then navigate to checkout
-            navigate('/cart');
+            navigate('/user/checkout');
         } catch (error) {
             console.error('Error processing buy now:', error);
             toast.error("Failed to process purchase");
         }
     };
 
+    const handleBookmarkToggle = () => {
+        const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+        
+        if (isBookmarked) {
+            // Remove from bookmarks
+            const updatedBookmarks = bookmarks.filter(b => b.eBookID !== book.eBookID);
+            localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+            setIsBookmarked(false);
+            toast("Success", {
+                description: "Removed from bookmarks",
+                variant: "success",
+            });
+        } else {
+            // Add to bookmarks
+            if (!bookmarks.some(b => b.eBookID === book.eBookID)) {
+                const updatedBookmarks = [...bookmarks, book];
+                localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+                setIsBookmarked(true);
+                toast("Success", {
+                    description: "Added to bookmarks",
+                    variant: "success",
+                });
+            }
+        }
+    };
+
+    const fetchUserInfo = async () => {
+        try {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (!sessionToken) return;
+
+            const response = await axios.get(userInfoEndpoint, {
+                headers: { Authorization: `Bearer ${sessionToken}` }
+            });
+            setCurrentUserInfo(response.data);
+
+            // Find user's review for this specific book
+            const userReviewForThisBook = reviews.find(review => 
+                review.user.userID === response.data.userID
+            );
+            
+            if (userReviewForThisBook) {
+                setUserReview(userReviewForThisBook);
+                setNewReviewText(userReviewForThisBook.reviewText);
+                setNewRating(userReviewForThisBook.rating);
+            } else {
+                // Reset review states if no review found for this book
+                setUserReview(null);
+                setNewReviewText("");
+                setNewRating(0);
+                setIsEditingReview(false);
+            }
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+        }
+    };
+
+    const handleReviewSubmit = async () => {
+        try {
+            setIsSubmitting(true);
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (!sessionToken) {
+                toast.error("Please login to post a review");
+                navigate(loginRoute);
+                return;
+            }
+
+            const reviewData = {
+                reviewText: newReviewText,
+                rating: newRating,
+                eBookID: parseInt(id)
+            };
+
+            const response = await axios.post(
+                `${backendUrl}/reviews/addreview`,
+                reviewData,
+                {
+                    headers: { Authorization: `Bearer ${sessionToken}` }
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success("Review posted successfully");
+                setNewReviewText("");
+                setNewRating(0);
+                fetchData(); // Refresh reviews
+            }
+        } catch (error) {
+            console.error('Error posting review:', error);
+            toast.error("Failed to post review");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleReviewUpdate = async () => {
+        try {
+            setIsUpdating(true);
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (!sessionToken) {
+                toast.error("Please login to update your review");
+                navigate(loginRoute);
+                return;
+            }
+
+            const reviewData = {
+                reviewText: newReviewText,
+                rating: newRating,
+                eBookID: parseInt(id)
+            };
+
+            const response = await axios.put(
+                `${backendUrl}/reviews/updatereview`,
+                reviewData,
+                {
+                    headers: { Authorization: `Bearer ${sessionToken}` }
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success("Review updated successfully");
+                setIsEditingReview(false);
+                fetchData(); // Refresh reviews
+            }
+        } catch (error) {
+            console.error('Error updating review:', error);
+            toast.error("Failed to update review");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handleReviewDelete = async () => {
+        try {
+            setIsDeletingReview(true);
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (!sessionToken || !userReview) return;
+
+            const response = await axios.delete(
+                `${backendUrl}/reviews/deletereview/${userReview.reviewID}`,
+                {
+                    headers: { Authorization: `Bearer ${sessionToken}` }
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success("Review deleted successfully");
+                setUserReview(null);
+                setNewReviewText("");
+                setNewRating(0);
+                setIsEditingReview(false);
+                fetchData(); // Refresh reviews
+            }
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            toast.error("Failed to delete review");
+        } finally {
+            setIsDeletingReview(false);
+        }
+    };
+
+    useEffect(() => {
+        if (userType === 1) {
+            fetchUserInfo();
+        }
+    }, [userInfoEndpoint, reviews, userType]);
+
+    useEffect(() => {
+        // Reset all review-related states
+        setUserReview(null);
+        setNewReviewText("");
+        setNewRating(0);
+        setIsEditingReview(false);
+        setReviews([]);
+        setAverageRating(0);
+        
+        // Then fetch new data
+        fetchData();
+    }, [id]);
+
     useEffect(() => {
         fetchData();
     }, [id, backendUrl]);
 
+    useEffect(() => {
+        if (book) {
+            // Check if book is bookmarked
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            setIsBookmarked(bookmarks.some(b => b.eBookID === book.eBookID));
+        }
+    }, [book]);
+
     if (error) {
         return (
-            <div className="h-[100svh] w-full flex flex-col overflow-hidden">
+            <div className="min-h-screen bg-background">
                 <CustomAppBar
                     userInfoEndpoint={userInfoEndpoint}
                     loginRoute={loginRoute}
@@ -276,21 +476,19 @@ export default function ProductView({
                     accountSettingRoute={accountSettingRoute}
                     userType={userType}
                 />
-                <main className="flex-1 w-full flex flex-col overflow-y-auto p-8">
-                    <div className="container mx-auto max-w-2xl">
-                        <Alert variant="destructive" className="mb-4">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                        <div className="flex justify-center gap-4">
-                            <Button variant="outline" onClick={() => navigate(homeRoute)}>
-                                Return to Home
-                            </Button>
-                            <Button onClick={fetchData}>
-                                <RefreshCcw className="mr-2 h-4 w-4" />
-                                Try Again
-                            </Button>
-                        </div>
+                <main className="container mx-auto px-4 py-6">
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                    <div className="flex justify-center gap-4">
+                        <Button variant="outline" onClick={() => navigate(homeRoute)}>
+                            Return to Home
+                        </Button>
+                        <Button onClick={fetchData}>
+                            <RefreshCcw className="mr-2 h-4 w-4" />
+                            Try Again
+                        </Button>
                     </div>
                 </main>
             </div>
@@ -299,7 +497,7 @@ export default function ProductView({
 
     if (loading) {
         return (
-            <div className="h-[100svh] w-full flex flex-col overflow-hidden">
+            <div className="min-h-screen bg-background">
                 <CustomAppBar
                     userInfoEndpoint={userInfoEndpoint}
                     loginRoute={loginRoute}
@@ -307,20 +505,18 @@ export default function ProductView({
                     accountSettingRoute={accountSettingRoute}
                     userType={userType}
                 />
-                <main className="flex-1 w-full flex flex-col overflow-y-auto p-8">
-                    <div className="container mx-auto">
-                        <div className="flex gap-8">
-                            <div className="w-1/3">
-                                <Skeleton className="h-[400px] w-full" />
-                            </div>
-                            <div className="w-2/3 space-y-4">
-                                <Skeleton className="h-8 w-2/3" />
-                                <Skeleton className="h-4 w-1/3" />
-                                <Skeleton className="h-24 w-full" />
-                                <div className="flex gap-2">
-                                    <Skeleton className="h-10 w-24" />
-                                    <Skeleton className="h-10 w-24" />
-                                </div>
+                <main className="container mx-auto px-4 py-6">
+                    <div className="flex gap-8">
+                        <div className="w-1/3">
+                            <Skeleton className="h-[400px] w-full" />
+                        </div>
+                        <div className="w-2/3 space-y-4">
+                            <Skeleton className="h-8 w-2/3" />
+                            <Skeleton className="h-4 w-1/3" />
+                            <Skeleton className="h-24 w-full" />
+                            <div className="flex gap-2">
+                                <Skeleton className="h-10 w-24" />
+                                <Skeleton className="h-10 w-24" />
                             </div>
                         </div>
                     </div>
@@ -354,7 +550,7 @@ export default function ProductView({
                         >
                             <Card className="md:col-span-4">
                                 <CardContent className="p-6">
-                                    <div className="aspect-[3/4] relative rounded-lg overflow-hidden">
+                                    <div className="aspect-[3/4] relative rounded-lg overflow-hidden mb-6">
                                         <img
                                             src={`data:image/png;base64,${book.cover}`}
                                             alt={book.title}
@@ -410,46 +606,80 @@ export default function ProductView({
                                             </AlertDialog>
                                         </div>
                                     )}
-                                    {userType === 1 && (
-                                        <div className="space-y-4 mt-6">
-                                            {book?.owned ? (
+                                    {userType === 1 ? (
+                                        book?.owned ? (
+                                            <div className="space-y-4 mt-6">
                                                 <Button
                                                     className="w-full"
                                                     onClick={() => navigate(`/user/read/${id}`)}
                                                 >
                                                     Read Ebook
                                                 </Button>
-                                            ) : (
-                                                <>
-                                                    {isInCart ? (
-                                                        <Button
-                                                            className="w-full"
-                                                            variant="destructive"
-                                                            onClick={handleDeleteFromCart}
-                                                        >
-                                                            Delete from Cart
-                                                        </Button>
+                                                <Button
+                                                    className="w-full"
+                                                    variant="secondary"
+                                                    onClick={handleBookmarkToggle}
+                                                >
+                                                    {isBookmarked ? (
+                                                        <>
+                                                            <BookmarkCheck className="mr-2 h-4 w-4" />
+                                                            Remove from Bookmarks
+                                                        </>
                                                     ) : (
                                                         <>
-                                                            <Button
-                                                                className="w-full"
-                                                                variant="outline"
-                                                                onClick={handleAddToCart}
-                                                            >
-                                                                Add to Cart
-                                                            </Button>
-                                                            <Button
-                                                                className="w-full"
-                                                                onClick={handleBuyNow}
-                                                            >
-                                                                Buy Now
-                                                            </Button>
+                                                            <Bookmark className="mr-2 h-4 w-4" />
+                                                            Add to Bookmarks
                                                         </>
                                                     )}
-                                                </>
-                                            )}
-                                        </div>
-                                    )}
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4 mt-6">
+                                                {isInCart ? (
+                                                    <Button
+                                                        className="w-full"
+                                                        variant="destructive"
+                                                        onClick={handleDeleteFromCart}
+                                                    >
+                                                        Delete from Cart
+                                                    </Button>
+                                                ) : (
+                                                    <>
+                                                        <Button
+                                                            className="w-full"
+                                                            variant="outline"
+                                                            onClick={handleAddToCart}
+                                                        >
+                                                            Add to Cart
+                                                        </Button>
+                                                        <Button
+                                                            className="w-full"
+                                                            onClick={handleBuyNow}
+                                                        >
+                                                            Buy Now
+                                                        </Button>
+                                                    </>
+                                                )}
+                                                <Button
+                                                    className="w-full"
+                                                    variant="secondary"
+                                                    onClick={handleBookmarkToggle}
+                                                >
+                                                    {isBookmarked ? (
+                                                        <>
+                                                            <BookmarkCheck className="mr-2 h-4 w-4" />
+                                                            Remove from Bookmarks
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Bookmark className="mr-2 h-4 w-4" />
+                                                            Add to Bookmarks
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        )
+                                    ) : null}
                                 </CardContent>
                             </Card>
                             <div className="md:col-span-8 space-y-8">
@@ -458,10 +688,9 @@ export default function ProductView({
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <h1 className="text-3xl font-bold">{book.title}</h1>
-                                                <Badge variant="outline" className="text-lg px-3">
-                                                    <DollarSign className="mr-1 h-4 w-4" />
-                                                    {book.price}
-                                                </Badge>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-2xl font-bold">₱{book?.price.toFixed(2)}</div>
+                                                </div>
                                             </div>
                                             <div className="flex items-center gap-4 text-muted-foreground">
                                                 <div className="flex items-center">
@@ -491,36 +720,178 @@ export default function ProductView({
                                                     readonly
                                                 />
                                                 <span className="text-lg font-semibold">
-                                                    {typeof averageRating === 'number' ? averageRating : '0'} out of 5
+                                                    {isNaN(averageRating) ? '0' : averageRating.toFixed(1)} out of 5
                                                 </span>
                                             </div>
                                         </div>
-                                        <ScrollArea className="h-[400px] pr-4">
-                                            <div className="space-y-4">
-                                                {reviews.map((review) => (
-                                                    <Card key={review.reviewID}>
-                                                        <CardContent className="p-4">
-                                                            <div className="space-y-2">
-                                                                <h3 className="font-semibold text-lg">
-                                                                    {review.user.name || 'Anonymous User'}
+
+                                        {userType === 1 && (
+                                            <Card className="mb-6">
+                                                <CardContent className="p-4">
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-start gap-4">
+                                                            <Avatar className="w-10 h-10">
+                                                                <AvatarImage
+                                                                    src={currentUserInfo?.avatar ? `data:image/png;base64,${currentUserInfo.avatar}` : ''}
+                                                                    alt={currentUserInfo?.name}
+                                                                />
+                                                                <AvatarFallback>
+                                                                    {currentUserInfo?.name?.charAt(0) || 'U'}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex-1">
+                                                                <h3 className="font-semibold">
+                                                                    {currentUserInfo?.name || 'User'}
                                                                 </h3>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Rating
-                                                                        value={isNaN(review.rating) ? 0 : review.rating}
-                                                                        readonly
-                                                                    />
+                                                                {(!userReview && !isEditingReview) ? (
+                                                                    <>
+                                                                        <Rating
+                                                                            value={newRating}
+                                                                            onChange={setNewRating}
+                                                                        />
+                                                                        <Textarea
+                                                                            value={newReviewText}
+                                                                            onChange={(e) => setNewReviewText(e.target.value)}
+                                                                            placeholder="Write your review..."
+                                                                            className="mt-2"
+                                                                        />
+                                                                        <div className="flex justify-end gap-2 mt-2">
+                                                                            <Button
+                                                                                onClick={handleReviewSubmit}
+                                                                                disabled={!newReviewText || newRating === 0 || isSubmitting}
+                                                                            >
+                                                                                {isSubmitting && (
+                                                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                                )}
+                                                                                Post Review
+                                                                            </Button>
+                                                                        </div>
+                                                                    </>
+                                                                ) : isEditingReview ? (
+                                                                    <>
+                                                                        <Rating
+                                                                            value={newRating}
+                                                                            onChange={setNewRating}
+                                                                        />
+                                                                        <Textarea
+                                                                            value={newReviewText}
+                                                                            onChange={(e) => setNewReviewText(e.target.value)}
+                                                                            placeholder="Write your review..."
+                                                                            className="mt-2"
+                                                                        />
+                                                                        <div className="flex justify-end gap-2 mt-2">
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                onClick={() => {
+                                                                                    setIsEditingReview(false);
+                                                                                    setNewReviewText(userReview.reviewText);
+                                                                                    setNewRating(userReview.rating);
+                                                                                }}
+                                                                                disabled={isUpdating}
+                                                                            >
+                                                                                Cancel
+                                                                            </Button>
+                                                                            <Button
+                                                                                onClick={handleReviewUpdate}
+                                                                                disabled={!newReviewText || newRating === 0 || isUpdating}
+                                                                            >
+                                                                                {isUpdating && (
+                                                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                                )}
+                                                                                Update Review
+                                                                            </Button>
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Rating
+                                                                            value={userReview.rating}
+                                                                            readonly
+                                                                        />
+                                                                        <p className="mt-2">{userReview.reviewText}</p>
+                                                                        <div className="flex justify-end gap-2 mt-2">
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                onClick={() => {
+                                                                                    setIsEditingReview(true);
+                                                                                    setNewReviewText(userReview.reviewText);
+                                                                                    setNewRating(userReview.rating);
+                                                                                }}
+                                                                                disabled={isUpdating}
+                                                                            >
+                                                                                Edit
+                                                                            </Button>
+                                                                            <AlertDialog>
+                                                                                <AlertDialogTrigger asChild>
+                                                                                    <Button variant="destructive">Delete</Button>
+                                                                                </AlertDialogTrigger>
+                                                                                <AlertDialogContent>
+                                                                                    <AlertDialogHeader>
+                                                                                        <AlertDialogTitle>Delete Review?</AlertDialogTitle>
+                                                                                        <AlertDialogDescription>
+                                                                                            This action cannot be undone.
+                                                                                        </AlertDialogDescription>
+                                                                                    </AlertDialogHeader>
+                                                                                    <AlertDialogFooter>
+                                                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                                        <AlertDialogAction
+                                                                                            onClick={handleReviewDelete}
+                                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                                            disabled={isDeletingReview}
+                                                                                        >
+                                                                                            {isDeletingReview && (
+                                                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                                            )}
+                                                                                            Delete
+                                                                                        </AlertDialogAction>
+                                                                                    </AlertDialogFooter>
+                                                                                </AlertDialogContent>
+                                                                            </AlertDialog>
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        )}
+
+                                        <ScrollArea className="h-[400px] pr-4">
+                                            {reviews.filter(review => !userReview || review.reviewID !== userReview.reviewID).map((review) => (
+                                                <Card key={review.reviewID} className="mb-4">
+                                                    <CardContent className="p-4">
+                                                        <div className="flex items-start gap-4">
+                                                            <Avatar className="w-10 h-10">
+                                                                <AvatarImage
+                                                                    src={review.user.avatar ? `data:image/png;base64,${review.user.avatar}` : ''}
+                                                                    alt={review.user.name}
+                                                                />
+                                                                <AvatarFallback>
+                                                                    {review.user.name?.charAt(0) || 'U'}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex-1">
+                                                                <div className="flex justify-between items-start">
+                                                                    <div>
+                                                                        <h3 className="font-semibold">{review.user.name}</h3>
+                                                                        <Rating value={review.rating} readonly />
+                                                                    </div>
                                                                     <span className="text-sm text-muted-foreground">
-                                                                        {review.rating} out of 5
+                                                                        {format(new Date(review.date), 'MMM d, yyyy')}
                                                                     </span>
                                                                 </div>
-                                                                <p className="text-muted-foreground">
-                                                                    {review.reviewText}
-                                                                </p>
+                                                                <p className="mt-2">{review.reviewText}</p>
                                                             </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
-                                            </div>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                            {reviews.length === 0 && (
+                                                <div className="text-center py-8 text-muted-foreground">
+                                                    No reviews yet. Be the first to review this book!
+                                                </div>
+                                            )}
                                         </ScrollArea>
                                     </CardContent>
                                 </Card>

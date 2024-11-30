@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
@@ -54,18 +54,24 @@ const CustomAppBar = ({
     const [loading, setLoading] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [cartCount, setCartCount] = useState(0);
     const [cartItems, setCartItems] = useState([]);
     const [loadingCart, setLoadingCart] = useState(false);
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const searchTimeoutRef = useRef(null);
+    const searchContainerRef = useRef(null);
 
     const isUser = userType === 1;
 
     const navigationItems = isUser ? [
         { icon: Home, label: 'Home', path: homeRoute },
         { icon: BookOpen, label: 'Books', path: '/user/books' },
-        { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks' },
+        { icon: Bookmark, label: 'Bookmarks', path: '/user/bookmarks' },
         { icon: Grid, label: 'Categories', path: '/categories' }
     ] : [
         { icon: Home, label: 'Home', path: homeRoute },
@@ -100,6 +106,59 @@ const CustomAppBar = ({
 
         fetchUserInfo();
     }, [userInfoEndpoint, loginRoute, navigate]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const searchBooks = async (query) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        try {
+            setIsSearching(true);
+            const sessionToken = localStorage.getItem('sessionToken');
+            const response = await axios.get(`${backendUrl}/ebook/searchtopthreeebooks`, {
+                params: { keyword: query },
+                headers: { Authorization: `Bearer ${sessionToken}` }
+            });
+            setSearchResults(response.data || []);
+        } catch (error) {
+            console.error('Error searching books:', error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        setShowSuggestions(true);
+
+        // Clear existing timeout
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        // Set new timeout
+        searchTimeoutRef.current = setTimeout(() => {
+            searchBooks(query);
+        }, 500);
+    };
+
+    const handleSuggestionClick = (bookId) => {
+        navigate(`/user/home/ebookinfo/${bookId}`);
+        setShowSuggestions(false);
+    };
 
     useEffect(() => {
         // const fetchCartCount = async () => {
@@ -259,17 +318,92 @@ const CustomAppBar = ({
                         "relative max-w-md mx-auto transition-all duration-300",
                         searchFocused ? "scale-105" : "scale-100"
                     )}>
-                        <Search className={cn(
-                            "absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform transition-colors",
-                            searchFocused ? "text-primary" : "text-muted-foreground"
-                        )} />
-                        <Input
-                            type="search"
-                            placeholder="Search books..."
-                            className="w-full pl-8 bg-muted/50"
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={() => setSearchFocused(false)}
-                        />
+                        <div className="relative flex-1 max-w-md" ref={searchContainerRef}>
+                            <div className="relative">
+                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search books..."
+                                    className="pl-8 w-full"
+                                    onFocus={() => {
+                                        setSearchFocused(true);
+                                        if (searchQuery.trim()) {
+                                            setShowSuggestions(true);
+                                        }
+                                    }}
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && searchQuery.trim()) {
+                                            navigate(`/user/search?keyword=${encodeURIComponent(searchQuery.trim())}`);
+                                            setShowSuggestions(false);
+                                        }
+                                    }}
+                                />
+                            </div>
+                            
+                            {/* Search Suggestions Dropdown */}
+                            <AnimatePresence>
+                                {showSuggestions && (searchResults.length > 0 || isSearching) && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="absolute z-50 w-full mt-2 bg-popover text-popover-foreground rounded-md border shadow-md"
+                                    >
+                                        <div className="p-2 space-y-2">
+                                            {isSearching ? (
+                                                <div className="space-y-2">
+                                                    {[1, 2, 3].map((i) => (
+                                                        <div key={i} className="flex items-center space-x-3 p-2">
+                                                            <div className="w-10 h-14 bg-muted animate-pulse rounded" />
+                                                            <div className="space-y-2 flex-1">
+                                                                <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                                                                <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {searchResults.map((book) => (
+                                                        <div
+                                                            key={book.eBookID}
+                                                            className="flex items-center space-x-3 p-2 hover:bg-accent rounded-sm cursor-pointer"
+                                                            onClick={() => handleSuggestionClick(book.eBookID)}
+                                                        >
+                                                            <div className="relative w-10 h-14 overflow-hidden rounded">
+                                                                <img
+                                                                    src={book.cover ? `data:image/jpeg;base64,${book.cover}` : ''}
+                                                                    alt={book.title}
+                                                                    className="absolute inset-0 w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-medium truncate">{book.title}</p>
+                                                                <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <Separator className="my-2" />
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-start text-sm text-muted-foreground hover:text-foreground"
+                                                        onClick={() => {
+                                                            navigate(`/user/search?keyword=${encodeURIComponent(searchQuery.trim())}`);
+                                                            setShowSuggestions(false);
+                                                        }}
+                                                    >
+                                                        <Search className="mr-2 h-4 w-4" />
+                                                        See all results
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
 

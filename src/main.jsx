@@ -7,6 +7,7 @@ import UsrLogin from './forms/UserLogin.jsx'
 import UsrRegister from './forms/UserRegister.jsx'
 import UserDashboard from "./home/UserDashboard.jsx";
 import UserAccountSetting from "./home/UserAccountSetting.jsx";
+import BookmarksPage from "./pages/BookmarksPage.jsx";
 
 import PublisherDashboard from "./home/PublisherDashboard.jsx";
 import PublisherLogin from  "./forms/PublisherLogin.jsx";
@@ -19,6 +20,7 @@ import UserProductView from "./home/UserProductView.jsx";
 import ReadBook from "./pages/ReadBook.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import BooksPage from "./pages/BooksPage.jsx";
+import SearchPage from "./pages/SearchPage.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
@@ -30,6 +32,8 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/user/register" element={<UsrRegister/>} />
                 <Route path="/user/home" element={<UserDashboard/>} />
                 <Route path="/user/books" element={<BooksPage/>} />
+                <Route path="/user/search" element={<SearchPage />} />
+                <Route path="/user/bookmarks" element={<BookmarksPage />} />
                 <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
                 <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
                 <Route path="user/read/:id" element={<ReadBook />} />
