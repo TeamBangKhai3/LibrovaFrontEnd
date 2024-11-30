@@ -73,7 +73,7 @@ const CustomAppBar = ({
         { icon: Home, label: 'Home', path: isLandingPage ? '/user/login' : homeRoute },
         { icon: BookOpen, label: 'Books', path: isLandingPage ? '/user/login' : '/user/books' },
         { icon: Bookmark, label: 'Bookmarks', path: isLandingPage ? '/user/login' : '/user/bookmarks' },
-        { icon: Grid, label: 'Categories', path: isLandingPage ? '/user/login' : '/categories' }
+        { icon: Grid, label: 'Categories', path: isLandingPage ? '/user/login' : '/user/categories' }
     ] : [
         { icon: Home, label: 'Home', path: homeRoute },
         { icon: BookOpen, label: 'My Books', path: '/mybooks' },
