@@ -264,6 +264,13 @@ const CustomAppBar = ({
         }
     };
 
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP'
+        }).format(amount);
+    };
+
     return (
         <motion.header 
             className={cn(
@@ -500,7 +507,7 @@ const CustomAppBar = ({
                                                             <div className="flex-1 space-y-1">
                                                                 <p className="text-sm font-medium leading-none">{item.eBook.title}</p>
                                                                 <p className="text-sm text-muted-foreground">{item.eBook.author}</p>
-                                                                <p className="text-sm font-medium">${item.eBook.price.toFixed(2)}</p>
+                                                                <p className="text-sm font-medium">{formatCurrency(item.eBook.price)}</p>
                                                             </div>
                                                             <Button
                                                                 variant="ghost"
