@@ -3,10 +3,12 @@ import CustomAppBar from '../components/CustomAppBar';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 
 export default function AnalyticsPage() {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <CustomAppBar
-                userInfoEndpoint="/publisher/getpublisherinfo"
+                userInfoEndpoint={`${backendUrl}/publishers/getpublisherinfo`}
                 loginRoute="/publisher/login"
                 homeRoute="/publisher/home"
                 accountSettingRoute="/publisher/accountsetting"
