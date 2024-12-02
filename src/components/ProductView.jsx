@@ -57,95 +57,76 @@ export default function ProductView({
     const navigate = useNavigate();
     const nothing = "No description available please contact the publisher for more information. Thank you! :)";
 
-    const fetchData = async () => {
-        console.log(' Starting fetchData for book ID:', id);
+    const fetchAllData = async (shouldResetStates = false) => {
+        console.log('Starting fetchAllData, shouldResetStates:', shouldResetStates);
+        if (shouldResetStates) {
+            setUserReview(null);
+            setNewReviewText("");
+            setNewRating(0);
+            setIsEditingReview(false);
+            setReviews([]);
+            setAverageRating(0);
+        }
+
         setLoading(true);
         setError(null);
         try {
             const sessionToken = localStorage.getItem('sessionToken');
-            console.log(' Session Token exists:', !!sessionToken);
-            console.log(' User Type:', userType);
-
             const headers = {
                 'Authorization': `Bearer ${sessionToken}`,
                 'Content-Type': 'application/json'
             };
 
-            console.log(' Request Headers:', headers);
-            console.log(' Making API calls...');
-
             // Always fetch book data, ratings, and reviews
-            const apiCalls = [
+            const [bookResponse, ratingResponse, reviewsResponse] = await Promise.all([
                 axios.get(`${backendUrl}/ebook/getebook/${id}`, { headers }),
                 axios.get(`${backendUrl}/reviews/getaveragerating/${id}`),
                 axios.get(`${backendUrl}/reviews/getallreviews/${id}`)
-            ];
-
-            // Only fetch cart data for regular users (userType === 1)
-            if (userType === 1) {
-                console.log(' Adding cart API call for regular user');
-                apiCalls.push(
-                    axios.get(`${backendUrl}/order/vieworder`, { headers })
-                );
-            }
-
-            const responses = await Promise.all(apiCalls);
-            console.log(' API Responses:', responses.map(r => ({ status: r.status, url: r.config.url })));
-
-            const [bookResponse, ratingResponse, reviewsResponse, ...rest] = responses;
+            ]);
 
             if (!bookResponse.data) {
                 throw new Error('Book not found');
             }
-
-            console.log(' Book Data:', bookResponse.data);
-            console.log(' Rating:', ratingResponse.data);
-            console.log(' Reviews:', reviewsResponse.data);
 
             setBook(bookResponse.data);
             setTitle(bookResponse.data.title);
             setAverageRating(ratingResponse.data ? Number(ratingResponse.data) : 0);
             setReviews(reviewsResponse.data);
 
-            // Process cart data only for regular users
-            if (userType === 1 && rest.length > 0) {
-                const cartResponse = rest[0];
-                console.log(' Cart Response:', cartResponse.data);
+            // Only fetch user-specific data for regular users
+            if (userType === 1 && sessionToken) {
+                // Fetch user info and cart data in parallel
+                const [userInfoResponse, cartResponse] = await Promise.all([
+                    axios.get(userInfoEndpoint, { headers }),
+                    axios.get(`${backendUrl}/order/vieworder`, { headers })
+                ]);
+
+                setCurrentUserInfo(userInfoResponse.data);
+
+                // Find user's review
+                const userReviewForThisBook = reviewsResponse.data.find(review => 
+                    review.user?.userID === userInfoResponse.data.userID
+                );
                 
-                // Check if book is in cart and store orderItemID if found
+                if (userReviewForThisBook) {
+                    setUserReview(userReviewForThisBook);
+                    setNewReviewText(userReviewForThisBook.reviewText);
+                    setNewRating(userReviewForThisBook.rating);
+                }
+
+                // Process cart data
                 const cartItems = cartResponse.data.orderItems || [];
-                console.log(' Cart Items:', cartItems);
-                console.log(' Current Book ID:', id);
-                console.log(' Cart Item IDs:', cartItems.map(item => item.eBook.eBookID));
-                
-                let orderItemToDelete = null;
                 const bookInCart = cartItems.some(item => {
-                    const cartBookId = item.eBook.eBookID;
-                    const currentBookId = parseInt(id);
-                    console.log(' Comparing:', { cartBookId, currentBookId, matches: cartBookId === currentBookId });
-                    if (cartBookId === currentBookId) {
-                        orderItemToDelete = item.orderItemID;
+                    if (item.eBook.eBookID === parseInt(id)) {
+                        setOrderItemId(item.orderItemID);
                         return true;
                     }
                     return false;
                 });
-
-                console.log(' Is Book in Cart?', bookInCart);
-                console.log(' Order Item ID to delete:', orderItemToDelete);
                 setIsInCart(bookInCart);
-                setOrderItemId(orderItemToDelete);
-            } else {
-                // Reset cart-related state for publishers
-                setIsInCart(false);
-                setOrderItemId(null);
             }
         } catch (error) {
-            console.error(' Error in fetchData:', error);
-            console.error('Error details:', {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status
-            });
+            console.error('Error in fetchAllData:', error);
             setError(
                 error.response?.status === 404
                     ? 'Book not found. It may have been deleted or moved.'
@@ -153,8 +134,14 @@ export default function ProductView({
             );
         } finally {
             setLoading(false);
+            setIsLoadingUserInfo(false);
         }
     };
+
+    // Single useEffect for data fetching
+    useEffect(() => {
+        fetchAllData(true);
+    }, [id, backendUrl]);
 
     const handleDelete = async () => {
         if (!onDelete) return;
@@ -301,42 +288,6 @@ export default function ProductView({
         }
     };
 
-    const fetchUserInfo = async () => {
-        try {
-            setIsLoadingUserInfo(true);
-            const sessionToken = localStorage.getItem('sessionToken');
-            if (!sessionToken) {
-                setIsLoadingUserInfo(false);
-                return;
-            }
-
-            const response = await axios.get(userInfoEndpoint, {
-                headers: { Authorization: `Bearer ${sessionToken}` }
-            });
-            setCurrentUserInfo(response.data);
-
-            // Find user's review for this specific book
-            const userReviewForThisBook = reviews.find(review => 
-                review.user?.userID === response.data.userID
-            );
-            
-            if (userReviewForThisBook) {
-                setUserReview(userReviewForThisBook);
-                setNewReviewText(userReviewForThisBook.reviewText);
-                setNewRating(userReviewForThisBook.rating);
-            } else {
-                setUserReview(null);
-                setNewReviewText("");
-                setNewRating(0);
-                setIsEditingReview(false);
-            }
-        } catch (error) {
-            console.error('Error fetching user info:', error);
-        } finally {
-            setIsLoadingUserInfo(false);
-        }
-    };
-
     const handleReviewSubmit = async () => {
         try {
             setIsSubmitting(true);
@@ -363,9 +314,21 @@ export default function ProductView({
 
             if (response.status === 200) {
                 toast.success("Review posted successfully");
+                
+                // Update local state
+                const newReview = {
+                    ...response.data,
+                    user: currentUserInfo
+                };
+                setReviews(prev => [...prev, newReview]);
+                setUserReview(newReview);
+                
+                // Only fetch new rating
+                const ratingResponse = await axios.get(`${backendUrl}/reviews/getaveragerating/${id}`);
+                setAverageRating(ratingResponse.data ? Number(ratingResponse.data) : 0);
+                
                 setNewReviewText("");
                 setNewRating(0);
-                fetchData(); // Refresh reviews
             }
         } catch (error) {
             console.error('Error posting review:', error);
@@ -401,8 +364,22 @@ export default function ProductView({
 
             if (response.status === 200) {
                 toast.success("Review updated successfully");
+                
+                // Update local state
+                const updatedReview = {
+                    ...response.data,
+                    user: currentUserInfo
+                };
+                setReviews(prev => prev.map(review => 
+                    review.reviewID === updatedReview.reviewID ? updatedReview : review
+                ));
+                setUserReview(updatedReview);
+                
+                // Only fetch new rating
+                const ratingResponse = await axios.get(`${backendUrl}/reviews/getaveragerating/${id}`);
+                setAverageRating(ratingResponse.data ? Number(ratingResponse.data) : 0);
+                
                 setIsEditingReview(false);
-                fetchData(); // Refresh reviews
             }
         } catch (error) {
             console.error('Error updating review:', error);
@@ -427,11 +404,17 @@ export default function ProductView({
 
             if (response.status === 200) {
                 toast.success("Review deleted successfully");
+                
+                // Update local state
+                setReviews(prev => prev.filter(review => review.reviewID !== userReview.reviewID));
                 setUserReview(null);
                 setNewReviewText("");
                 setNewRating(0);
                 setIsEditingReview(false);
-                fetchData(); // Refresh reviews
+                
+                // Only fetch new rating
+                const ratingResponse = await axios.get(`${backendUrl}/reviews/getaveragerating/${id}`);
+                setAverageRating(ratingResponse.data ? Number(ratingResponse.data) : 0);
             }
         } catch (error) {
             console.error('Error deleting review:', error);
@@ -442,42 +425,12 @@ export default function ProductView({
     };
 
     useEffect(() => {
-        if (userType === 1 && reviews.length > 0) {
-            const sessionToken = localStorage.getItem('sessionToken');
-            if (!sessionToken) {
-                setIsLoadingUserInfo(false);
-                return;
-            }
-            fetchUserInfo();
-        } else {
-            setIsLoadingUserInfo(false);
-        }
-    }, [userType, reviews]);
-
-    useEffect(() => {
-        // Reset all review-related states
-        setUserReview(null);
-        setNewReviewText("");
-        setNewRating(0);
-        setIsEditingReview(false);
-        setReviews([]);
-        setAverageRating(0);
-        
-        // Then fetch new data
-        fetchData();
-    }, [id]);
-
-    useEffect(() => {
         if (book) {
             // Check if book is bookmarked
             const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
             setIsBookmarked(bookmarks.some(b => b.eBookID === book.eBookID));
         }
     }, [book]);
-
-    useEffect(() => {
-        fetchData();
-    }, [id, backendUrl]);
 
     if (error) {
         return (
@@ -498,7 +451,7 @@ export default function ProductView({
                         <Button variant="outline" onClick={() => navigate(homeRoute)}>
                             Return to Home
                         </Button>
-                        <Button onClick={fetchData}>
+                        <Button onClick={fetchAllData}>
                             <RefreshCcw className="mr-2 h-4 w-4" />
                             Try Again
                         </Button>

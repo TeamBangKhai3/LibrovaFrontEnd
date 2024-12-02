@@ -11,7 +11,7 @@ export default function UserProductView() {
 
     const breadcrumbLinks = [
         { label: 'User', path: '/user/home' },
-        { label: 'Home', path: '/user/home' },
+        { label: 'Books', path: '/user/books' },
     ];
 
     const handleAddToCart = async (id) => {

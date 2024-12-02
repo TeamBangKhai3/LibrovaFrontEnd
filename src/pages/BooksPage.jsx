@@ -15,7 +15,6 @@ const BooksPage = () => {
 
     const breadcrumbLinks = [
         { label: 'User', path: '/user/home' },
-        { label: 'Home', path: '/user/home' },
     ];
 
     useEffect(() => {
