@@ -13,7 +13,6 @@ export default function UserDashboard() {
 
     const breadcrumbLinks = [
         { label: 'User', path: '/user/home' },
-        { label: 'Home', path: '/user/home' },
     ];
 
     return (
