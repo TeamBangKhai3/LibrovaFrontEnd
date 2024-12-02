@@ -72,6 +72,8 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
         },
     });
 
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
     const onSubmit = async (data) => {
         if (data.password !== data.confirmPassword) {
             form.setError("confirmPassword", { type: "manual", message: "Passwords do not match" });
@@ -80,21 +82,26 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
 
         setIsLoading(true);
         try {
+            // First check if username or email exists
+            await axios.post(`${backendUrl}/authuser/checkuser`, data);
+            
+            // If no error thrown, proceed with registration
+            setRegistrationData(data);
             const response = await axios.post(registerEndpoint, data);
             if (response.data === "check_otp") {
-                setRegistrationData(data);
                 setShowOtpDialog(true);
                 toast.info("OTP sent to your phone number", {
                     description: "Please check your phone for the verification code.",
                 });
-            } else if (response.data === "Username already exists") {
-                toast.error("Username already exists");
             } else {
                 handleSuccessfulRegistration(response.data);
             }
         } catch (error) {
-            const errorMessage = error.response?.data || "Registration failed";
-            toast.error(errorMessage);
+            if (error.response?.status === 400) {
+                toast.error("Username or email already exists");
+            } else {
+                toast.error("Registration failed. Please try again.");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -104,16 +111,19 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
         setIsLoading(true);
         try {
             const response = await axios.post(
-                `${registerEndpoint}withotp/${otpData.otp}`, 
+                `${backendUrl}/authuser/registerwithotp/${otpData.otp}`, 
                 registrationData
             );
             handleSuccessfulRegistration(response.data);
         } catch (error) {
-            const errorMessage = error.response?.data || "OTP verification failed";
-            toast.error(errorMessage);
-        } finally {
+            const errorMessage = error.response?.data?.message || error.response?.data || "Invalid OTP, please try again.";
+            toast.error(typeof errorMessage === 'string' ? errorMessage : "Invalid OTP, please try again.");
             setIsLoading(false);
+            return;
         }
+        
+        setIsLoading(false);
+        setShowOtpDialog(false);
     };
 
     const handleSuccessfulRegistration = (token) => {

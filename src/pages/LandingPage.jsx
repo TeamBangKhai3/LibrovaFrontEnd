@@ -63,7 +63,7 @@ const LandingPage = () => {
                     Books Shouldn't Be This Locked Down 🔒
                   </h1>
                   <p className="text-gray-500 md:text-xl dark:text-gray-400">
-                    Connect with publishers, discover new books, and read anywhere. Join our growing community of readers and publishers.
+                    Connect with publishers, discover new books, and yours to own forever. Join our growing community of readers and publishers.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center mt-8">
@@ -108,7 +108,7 @@ const LandingPage = () => {
                         </div>
                         <h4 className="font-semibold">Publisher Network</h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Access books from top publishers worldwide
+                          Access books from top publishers and independent authors worldwide
                         </p>
                       </div>
                       <div className="flex flex-col items-center text-center space-y-3">

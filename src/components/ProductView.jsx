@@ -329,6 +329,9 @@ export default function ProductView({
                 
                 setNewReviewText("");
                 setNewRating(0);
+
+                // Refresh the page
+                window.location.reload();
             }
         } catch (error) {
             console.error('Error posting review:', error);
@@ -380,6 +383,9 @@ export default function ProductView({
                 setAverageRating(ratingResponse.data ? Number(ratingResponse.data) : 0);
                 
                 setIsEditingReview(false);
+
+                // Refresh the page
+                window.location.reload();
             }
         } catch (error) {
             console.error('Error updating review:', error);
