@@ -163,3 +163,82 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Markdown Editor Theme */
+.w-md-editor {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor-text {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor-text-pre, .w-md-editor-text-input, .w-md-editor-text-pre > code {
+  color: hsl(var(--foreground)) !important;
+  background-color: transparent !important;
+}
+
+.w-md-editor-toolbar {
+  background-color: hsl(var(--card)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.w-md-editor-toolbar li > button {
+  color: hsl(var(--foreground)) !important;
+  background: transparent !important;
+}
+
+.w-md-editor-toolbar li > button:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.wmde-markdown {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor-preview {
+  background-color: hsl(var(--background)) !important;
+  box-shadow: inset 1px 0 0 0 hsl(var(--border)) !important;
+}
+
+/* Phone Input Theme */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  min-width: 0;
+  background-color: transparent !important;
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  min-height: 2.5rem;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  color: hsl(var(--foreground));
+}
+
+.PhoneInputInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+}
+
+.PhoneInputCountry {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  background-color: transparent;
+  border-radius: var(--radius);
+  color: hsl(var(--foreground));
+}

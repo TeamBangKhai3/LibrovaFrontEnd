@@ -7,6 +7,7 @@ import { z } from "zod";
 import { toast, Toaster } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/providers/theme-provider";
+import ReactConfetti from 'react-confetti';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,14 @@ import logoinv from '../assets/logoinv.png';
 import loginbg from '../assets/loginbg.jpg';
 import darkloginbg from '../assets/darkloginbg.jpg';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog";
 
 const FormSchema = z.object({
     username: z.string().min(4, {
@@ -42,6 +51,8 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isCheckingSession, setIsCheckingSession] = useState(true);
+    const [showForgotDialog, setShowForgotDialog] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
     const { theme } = useTheme();
     
     const form = useForm({
@@ -130,7 +141,7 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                 />
                 
                 <Card className="relative w-11/12 max-w-xl bg-background/95 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden">
-                    <ScrollArea className="h-[600px]">
+                    <ScrollArea className="h-[550px]">
                         <div className="p-6">
                             <motion.div
                                 initial={{ y: 20, opacity: 0 }}
@@ -227,23 +238,25 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                                                     Register
                                                 </Link>
                                                 <Link 
-                                                    to={forgotPasswordRoute} 
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setShowForgotDialog(true);
+                                                    }}
                                                     className="text-primary hover:text-primary/80"
                                                 >
                                                     Forgot Password?
                                                 </Link>
                                             </div>
 
-                                            <div className="relative my-4">
-                                                <div className="absolute inset-0 flex items-center">
-                                                    <span className="w-full border-t border-muted" />
-                                                </div>
-                                                <div className="relative flex justify-center text-xs uppercase">
-                                                    <span className="bg-background px-2 text-muted-foreground">
-                                                        Or
-                                                    </span>
-                                                </div>
+                                            <div className="my-6" aria-hidden="true" />
+
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-[2px] flex-1 bg-input"></div>
+                                                <p className="text-sm text-muted-foreground font-medium">or</p>
+                                                <div className="h-[2px] flex-1 bg-input"></div>
                                             </div>
+
+                                            <div className="my-6" aria-hidden="true" />
 
                                             <Link 
                                                 to={alternativeRoute}
@@ -282,6 +295,63 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                     </ScrollArea>
                 </Card>
             </motion.div>
+            <Dialog open={showForgotDialog} onOpenChange={setShowForgotDialog}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Forgot Your Password? 🤔</DialogTitle>
+                        <DialogDescription className="space-y-4 pt-4">
+                            <p>
+                                Have you tried turning your brain off and on again? 
+                                Sometimes our memory needs a quick reboot! 🧠✨
+                            </p>
+                            <p>
+                                But seriously, we all forget things sometimes. 
+                                Like that one time I forgot I was a computer program... 
+                                Wait, am I? 🤖
+                            </p>
+                            <p className="font-medium text-foreground">
+                                Don't worry! We're working on a proper password reset feature. 
+                                For now, try meditating or asking your cat - they seem to know everything! 🐱
+                            </p>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="sm:justify-center">
+                        <Button
+                            type="button"
+                            variant="default"
+                            onClick={() => {
+                                setShowConfetti(true);
+                                setTimeout(() => {
+                                    setShowConfetti(false);
+                                    setShowForgotDialog(false);
+                                }, 4000);
+                            }}
+                        >
+                            Thanks for the laugh! 😄
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {showConfetti && (
+                <div style={{ 
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 60,
+                    pointerEvents: 'none'
+                }}>
+                    <ReactConfetti
+                        width={window.innerWidth}
+                        height={window.innerHeight}
+                        recycle={false}
+                        numberOfPieces={500}
+                        gravity={0.3}
+                    />
+                </div>
+            )}
             <Toaster theme={theme} position="top-center" />
         </AnimatePresence>
     );

@@ -92,8 +92,12 @@ const CheckoutPage = () => {
                 headers: { Authorization: `Bearer ${sessionToken}` }
             });
             
-            // Update cart items
+            // Update cart items locally
             fetchCartItems();
+            
+            // Dispatch event to update cart in CustomAppBar
+            window.dispatchEvent(new CustomEvent('cartRefresh'));
+            
             toast("Success", {
                 description: "Item removed from cart",
                 variant: "success",

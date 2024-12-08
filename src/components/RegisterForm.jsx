@@ -7,6 +7,8 @@ import { z } from "zod";
 import { toast, Toaster } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/providers/theme-provider";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -180,7 +182,7 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                 />
                 
                 <Card className="relative w-11/12 max-w-xl bg-background/95 backdrop-blur-sm">
-                    <ScrollArea className="h-[600px] w-full rounded-md">
+                    <ScrollArea className="h-[650px] w-full rounded-md">
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -256,7 +258,15 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                                                 <FormItem>
                                                     <FormLabel>Phone Number</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Phone Number" {...field} />
+                                                        <PhoneInput
+                                                            international
+                                                            defaultCountry="PH"
+                                                            value={field.value}
+                                                            onChange={field.onChange}
+                                                            disabled={isLoading}
+                                                            className="flex"
+                                                            inputComponent={Input}
+                                                        />
                                                     </FormControl>
                                                     <FormMessage/>
                                                 </FormItem>
@@ -358,14 +368,27 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                             Register
                                         </Button>
-
-                                        <div className="flex justify-between text-sm">
-                                            <Link 
-                                                to={loginRoute} 
-                                                className="text-primary hover:text-primary/80"
-                                            >
-                                                Already have an account? Login
-                                            </Link>
+                                        <div className="space-y-2">
+                                            <p className="text-sm text-muted-foreground text-center">
+                                                By Registering to Librova, you accept the{" "}
+                                                <a 
+                                                    href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUIcmlja3JvbGw%3D"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-primary hover:underline"
+                                                >
+                                                    Terms and Conditions
+                                                </a>
+                                            </p>
+                                            <p className="text-sm text-muted-foreground text-center">
+                                                Already have an account?{" "}
+                                                <Link 
+                                                    to={loginRoute}
+                                                    className="text-primary hover:underline font-medium"
+                                                >
+                                                    Login
+                                                </Link>
+                                            </p>
                                         </div>
                                     </motion.div>
                                 </form>
