@@ -30,15 +30,16 @@ export const Rating = React.forwardRef(function Rating(props, ref) {
         onClick={() => handleClick(rating)}
         disabled={readonly}
         className={cn(
-          "p-0.5 hover:scale-110 transition-transform",
+          "p-0.5 hover:scale-110 transition-transform bg-transparent hover:bg-transparent",
+          "border-none shadow-none focus:outline-none focus:ring-0",
           !readonly && "cursor-pointer"
         )}
       >
         <Heart
           className={cn(
             "w-5 h-5 transition-colors",
-            filled ? "fill-red-500 text-red-500" : halfFilled ? "fill-red-500/50 text-red-500" : "text-gray-300",
-            !readonly && !filled && "hover:fill-red-200 hover:text-red-200",
+            filled ? "fill-foreground text-foreground" : halfFilled ? "fill-foreground/50 text-foreground/50" : "text-muted-foreground/25",
+            !readonly && !filled && "hover:fill-foreground/25 hover:text-foreground/25",
             className
           )}
         />

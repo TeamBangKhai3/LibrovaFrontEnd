@@ -196,6 +196,22 @@ const EbookReader = ({ bookId }) => {
                         }
                     });
 
+                    // Add styles to the iframe content
+                    rendition.hooks.content.register((contents) => {
+                        const style = document.createElement('style');
+                        style.innerHTML = `
+                            html, body {
+                                background-color: #f5f5eb !important;
+                            }
+                            @media (prefers-color-scheme: dark) {
+                                html, body {
+                                    background-color: #1a1a1a !important;
+                                }
+                            }
+                        `;
+                        contents.document.head.appendChild(style);
+                    });
+
                     // Set up rendition
                     console.log('Setting up rendition');
 
@@ -347,7 +363,7 @@ const EbookReader = ({ bookId }) => {
     }, []);
 
     return (
-        <Card className="w-full h-[80vh] relative bg-background overflow-hidden">
+        <Card className="w-full h-[80vh] relative overflow-hidden bg-[#f5f5eb] dark:bg-[#1a1a1a]">
             <div className="w-full h-full relative flex">
                 {/* Sidebar */}
                 <div 

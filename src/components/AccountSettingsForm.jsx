@@ -315,7 +315,7 @@ export default function AccountSettingsForm({
                                             <AvatarImage src={`data:image/png;base64,${values.avatar}`} alt="Profile Photo" />
                                             <AvatarFallback>{values.name?.charAt(0)}</AvatarFallback>
                                         </Avatar>
-                                        <Button variant="contained" size="sm">
+                                        <Button variant="outline" size="sm">
                                             <label className="flex items-center cursor-pointer">
                                                 <Camera className="mr-2 h-4 w-4" />
                                                 Change Photo
@@ -401,7 +401,7 @@ export default function AccountSettingsForm({
                     </Tabs>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                    <Button variant="destructive" onClick={handleDeleteClick} disabled={isLoading}>
+                    <Button variant="outline" onClick={handleDeleteClick} disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Delete Account
                     </Button>
@@ -420,7 +420,12 @@ export default function AccountSettingsForm({
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={handleDialogClose}>No</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDialogConfirm}>Yes</AlertDialogAction>
+                        <AlertDialogAction 
+                            onClick={handleDialogConfirm}
+                            className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                            Yes
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

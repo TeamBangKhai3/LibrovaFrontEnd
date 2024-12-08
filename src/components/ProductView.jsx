@@ -799,7 +799,7 @@ export default function ProductView({
                                                                             <AlertDialog>
                                                                                 <AlertDialogTrigger asChild>
                                                                                     <Button
-                                                                                        variant="destructive"
+                                                                                        variant="outline"
                                                                                         disabled={isDeletingReview}
                                                                                     >
                                                                                         {isDeletingReview ? (
@@ -826,7 +826,7 @@ export default function ProductView({
                                                                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                                                         <AlertDialogAction
                                                                                             onClick={handleReviewDelete}
-                                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                                            className="bg-primary text-primary-foreground hover:bg-primary/90"
                                                                                         >
                                                                                             Delete Review
                                                                                         </AlertDialogAction>

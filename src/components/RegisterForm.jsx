@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast, Toaster } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/providers/theme-provider";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +28,9 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import logotrans from '../assets/logotrans.png';
+import logoinv from '../assets/logoinv.png';
 import loginbg from '../assets/loginbg.jpg';
+import darkloginbg from '../assets/darkloginbg.jpg';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
@@ -51,6 +54,7 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
     const [isLoading, setIsLoading] = useState(false);
     const [showOtpDialog, setShowOtpDialog] = useState(false);
     const [registrationData, setRegistrationData] = useState(null);
+    const { theme } = useTheme();
 
     const form = useForm({
         resolver: zodResolver(FormSchema),
@@ -107,6 +111,38 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
         }
     };
 
+    const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
+    
+    const otpRefs = Array(6).fill(0).map(() => React.createRef());
+
+    const handleOtpChange = (index, value) => {
+        if (value.length > 1) return; // Prevent more than 1 digit
+
+        const newOtpValues = [...otpValues];
+        newOtpValues[index] = value;
+        setOtpValues(newOtpValues);
+
+        // Auto focus next input
+        if (value && index < 5) {
+            otpRefs[index + 1].current.focus();
+        }
+
+        // Update form value
+        otpForm.setValue('otp', newOtpValues.join(''));
+    };
+
+    const handleKeyDown = (index, e) => {
+        // Handle backspace
+        if (e.key === 'Backspace') {
+            if (!otpValues[index] && index > 0) {
+                const newOtpValues = [...otpValues];
+                newOtpValues[index - 1] = '';
+                setOtpValues(newOtpValues);
+                otpRefs[index - 1].current.focus();
+            }
+        }
+    };
+
     const onOtpSubmit = async (otpData) => {
         setIsLoading(true);
         try {
@@ -136,31 +172,31 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
 
     return (
         <>
-            <Toaster />
+            <Toaster theme={theme} position="top-center" />
             <div className="relative w-screen h-screen overflow-hidden flex items-center justify-center bg-background">
                 <div 
                     className="absolute inset-0 bg-cover bg-center filter blur-sm brightness-50"
-                    style={{backgroundImage: `url(${loginbg})`}}
+                    style={{backgroundImage: `url(${theme === 'dark' ? darkloginbg : loginbg})`}}
                 />
                 
-                <Card className="relative w-11/12 max-w-xl bg-background">
-                    <ScrollArea className="h-[85vh] w-full rounded-md">
+                <Card className="relative w-11/12 max-w-xl bg-background/95 backdrop-blur-sm">
+                    <ScrollArea className="h-[600px] w-full rounded-md">
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="p-8"
+                            transition={{ duration: 0.3 }}
+                            className="p-6"
                         >
                             <div className="flex flex-col items-center space-y-2 mb-6">
                                 <motion.img 
-                                    src={logotrans} 
+                                    src={theme === 'dark' ? logoinv : logotrans} 
                                     alt="logo" 
-                                    className="w-24 h-24"
+                                    className="w-16 h-16 sm:w-20 sm:h-20"
                                     initial={{ scale: 0.8 }}
                                     animate={{ scale: 1 }}
-                                    transition={{ duration: 0.5 }}
+                                    transition={{ duration: 0.3 }}
                                 />
-                                <h1 className="text-2xl font-bold">{title}</h1>
+                                <h1 className="text-xl sm:text-2xl font-bold text-foreground">{title}</h1>
                             </div>
 
                             <Form {...form}>
@@ -323,10 +359,12 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                                             Register
                                         </Button>
 
-                                        <div className="text-center text-sm">
-                                            Already have an account?{" "}
-                                            <Link to={loginRoute} className="font-medium underline underline-offset-4 hover:text-primary">
-                                                Login here
+                                        <div className="flex justify-between text-sm">
+                                            <Link 
+                                                to={loginRoute} 
+                                                className="text-primary hover:text-primary/80"
+                                            >
+                                                Already have an account? Login
                                             </Link>
                                         </div>
                                     </motion.div>
@@ -354,12 +392,23 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
                                     <FormItem>
                                         <FormLabel>OTP Code</FormLabel>
                                         <FormControl>
-                                            <Input 
-                                                placeholder="Enter 6-digit code" 
-                                                {...field} 
-                                                maxLength={6}
-                                                className="text-center text-lg tracking-widest"
-                                            />
+                                            <div className="flex gap-2 justify-center">
+                                                {otpValues.map((value, index) => (
+                                                    <Input
+                                                        key={index}
+                                                        ref={otpRefs[index]}
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        maxLength={1}
+                                                        className="w-12 h-12 text-center text-lg"
+                                                        value={value}
+                                                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                                                        onKeyDown={(e) => handleKeyDown(index, e)}
+                                                        autoFocus={index === 0}
+                                                    />
+                                                ))}
+                                            </div>
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>

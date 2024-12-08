@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import './index.css'
+import { ThemeProvider } from './providers/theme-provider'
 
 import UsrLogin from './forms/UserLogin.jsx'
 import UsrRegister from './forms/UserRegister.jsx'
@@ -27,30 +28,32 @@ import AnalyticsPage from "./pages/AnalyticsPage.jsx";
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <BrowserRouter>
-            <Routes>
-                {/*Testing the new Branch*/}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/user/login" element={<UsrLogin/>} />
-                <Route path="/user/register" element={<UsrRegister/>} />
-                <Route path="/user/home" element={<UserDashboard/>} />
-                <Route path="/user/books" element={<BooksPage/>} />
-                <Route path="/user/search" element={<SearchPage />} />
-                <Route path="/user/bookmarks" element={<BookmarksPage />} />
-                <Route path="/user/categories" element={<CategoriesPage />} />
-                <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
-                <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
-                <Route path="user/read/:id" element={<ReadBook />} />
-                <Route path="/user/checkout" element={<CheckoutPage />} />
-                <Route path="/publisher/login" element={<PublisherLogin/>} />
-                <Route path="/publisher/register" element={<PublisherRegister/>} />
-                <Route path="/publisher/home" element={<PublisherDashboard/>} />
-                <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
-                <Route path="/publisher/addebook" element={<PublisherAddBook/>} />
-                <Route path="/publisher/analytics" element={<AnalyticsPage />} />
-                <Route path="publisher/home/ebookinfo/:id" element={<PublisherProductView/>} />
-                <Route path="publisher/home/ebookinfo/editinfo/:id" element={<EditBook/>} />
-            </Routes>
-        </BrowserRouter>
+        <ThemeProvider defaultTheme="light" storageKey="librova-theme">
+            <BrowserRouter>
+                <Routes>
+                    {/*Testing the new Branch*/}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/user/login" element={<UsrLogin/>} />
+                    <Route path="/user/register" element={<UsrRegister/>} />
+                    <Route path="/user/home" element={<UserDashboard/>} />
+                    <Route path="/user/books" element={<BooksPage/>} />
+                    <Route path="/user/search" element={<SearchPage />} />
+                    <Route path="/user/bookmarks" element={<BookmarksPage />} />
+                    <Route path="/user/categories" element={<CategoriesPage />} />
+                    <Route path="/user/accountsetting" element={<UserAccountSetting/>} />
+                    <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
+                    <Route path="user/read/:id" element={<ReadBook />} />
+                    <Route path="/user/checkout" element={<CheckoutPage />} />
+                    <Route path="/publisher/login" element={<PublisherLogin/>} />
+                    <Route path="/publisher/register" element={<PublisherRegister/>} />
+                    <Route path="/publisher/home" element={<PublisherDashboard/>} />
+                    <Route path="/publisher/accountsetting" element={<PublisherAccountSetting/>} />
+                    <Route path="/publisher/addebook" element={<PublisherAddBook/>} />
+                    <Route path="/publisher/analytics" element={<AnalyticsPage />} />
+                    <Route path="publisher/home/ebookinfo/:id" element={<PublisherProductView/>} />
+                    <Route path="publisher/home/ebookinfo/editinfo/:id" element={<EditBook/>} />
+                </Routes>
+            </BrowserRouter>
+        </ThemeProvider>
     </StrictMode>
 )

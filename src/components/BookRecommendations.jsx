@@ -66,11 +66,11 @@ const BookRecommendations = () => {
                                 {[...Array(5)].map((_, index) => (
                                     <Box
                                         key={index}
+                                        className="bg-card"
                                         sx={{
                                             width: '180px',
                                             borderRadius: 1,
                                             overflow: 'hidden',
-                                            bgcolor: 'background.paper',
                                             boxShadow: 1
                                         }}
                                     >
@@ -111,7 +111,7 @@ const BookRecommendations = () => {
             {Object.entries(recommendations).map(([category, books]) => (
                 <Box key={category} sx={{ mb: 4 }}>
                     <motion.div variants={item}>
-                        <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold' }}>
+                        <Typography variant="h5" className="text-card-foreground" sx={{ mb: 2, fontWeight: 'bold' }}>
                             {category}
                         </Typography>
                     </motion.div>
@@ -140,12 +140,12 @@ const BookRecommendations = () => {
                                 >
                                     <Box
                                         onClick={() => navigate(`/user/home/ebookinfo/${book.eBookID}`)}
+                                        className="bg-card"
                                         sx={{
                                             width: '180px',
                                             overflow: 'hidden',
                                             cursor: 'pointer',
                                             borderRadius: 1,
-                                            bgcolor: 'background.paper',
                                             boxShadow: 1,
                                             '&:hover': {
                                                 boxShadow: 3
@@ -168,6 +168,7 @@ const BookRecommendations = () => {
                                         </Box>
                                         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                                             <Typography
+                                                className="text-card-foreground"
                                                 sx={{
                                                     fontWeight: 600,
                                                     overflow: 'hidden',
@@ -183,7 +184,7 @@ const BookRecommendations = () => {
                                             </Typography>
                                             <Typography
                                                 variant="body2"
-                                                color="text.secondary"
+                                                className="text-muted-foreground"
                                                 sx={{
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast, Toaster } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/providers/theme-provider";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +23,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import logotrans from '../assets/logotrans.png';
+import logoinv from '../assets/logoinv.png';
 import loginbg from '../assets/loginbg.jpg';
+import darkloginbg from '../assets/darkloginbg.jpg';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
@@ -39,6 +42,7 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isCheckingSession, setIsCheckingSession] = useState(true);
+    const { theme } = useTheme();
     
     const form = useForm({
         resolver: zodResolver(FormSchema),
@@ -119,14 +123,14 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                 <div 
                     className="absolute inset-0 bg-cover bg-center"
                     style={{ 
-                        backgroundImage: `url(${loginbg})`,
+                        backgroundImage: `url(${theme === 'dark' ? darkloginbg : loginbg})`,
                         filter: 'blur(8px) brightness(50%)',
                         transform: 'scale(1.1)'
                     }}
                 />
                 
-                <Card className="relative w-full max-w-sm bg-white/95 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden">
-                    <ScrollArea className="h-[500px]">
+                <Card className="relative w-11/12 max-w-xl bg-background/95 backdrop-blur-sm shadow-xl rounded-xl overflow-hidden">
+                    <ScrollArea className="h-[600px]">
                         <div className="p-6">
                             <motion.div
                                 initial={{ y: 20, opacity: 0 }}
@@ -134,9 +138,13 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                                 transition={{ delay: 0.1 }}
                                 className="flex flex-col items-center"
                             >
-                                <img src={logotrans} alt="logo" className="w-16 h-16 sm:w-20 sm:h-20 mb-4" />
-                                <h1 className="text-xl sm:text-2xl font-bold text-black mb-5">{title}</h1>
-                                
+                                <img 
+                                    src={theme === 'dark' ? logoinv : logotrans} 
+                                    alt="logo" 
+                                    className="w-16 h-16 sm:w-20 sm:h-20 mb-4" 
+                                />
+                                <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-5">{title}</h1>
+                                 
                                 <Form {...form}>
                                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col w-full space-y-4">
                                         <motion.div
@@ -160,7 +168,7 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
-                                                )}
+                                                )} 
                                             />
                                         </motion.div>
 
@@ -184,18 +192,24 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                                                                     className="h-10 pr-10"
                                                                     disabled={isLoading}
                                                                 />
-                                                                <button
+                                                                <Button
                                                                     type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
                                                                     onClick={() => setShowPassword(!showPassword)}
-                                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                                                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
                                                                 >
-                                                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                                                </button>
+                                                                    {showPassword ? (
+                                                                        <EyeOff className="h-4 w-4" />
+                                                                    ) : (
+                                                                        <Eye className="h-4 w-4" />
+                                                                    )}
+                                                                </Button>
                                                             </div>
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
-                                                )}
+                                                )} 
                                             />
                                         </motion.div>
 
@@ -205,11 +219,37 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                                             transition={{ delay: 0.4 }}
                                             className="space-y-3"
                                         >
+                                            <div className="flex justify-between text-sm">
+                                                <Link 
+                                                    to={registerRoute} 
+                                                    className="text-primary hover:text-primary/80"
+                                                >
+                                                    Register
+                                                </Link>
+                                                <Link 
+                                                    to={forgotPasswordRoute} 
+                                                    className="text-primary hover:text-primary/80"
+                                                >
+                                                    Forgot Password?
+                                                </Link>
+                                            </div>
+
+                                            <div className="relative my-4">
+                                                <div className="absolute inset-0 flex items-center">
+                                                    <span className="w-full border-t border-muted" />
+                                                </div>
+                                                <div className="relative flex justify-center text-xs uppercase">
+                                                    <span className="bg-background px-2 text-muted-foreground">
+                                                        Or
+                                                    </span>
+                                                </div>
+                                            </div>
+
                                             <Link 
-                                                to={forgotPasswordRoute} 
-                                                className="block text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                                                to={alternativeRoute}
+                                                className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
                                             >
-                                                Forgot Password?
+                                                {alternativeTitle}
                                             </Link>
 
                                             <Button 
@@ -236,25 +276,13 @@ const LoginForm = ({ pingEndpoint, authEndpoint, redirectRoute, title, registerR
                                     transition={{ delay: 0.5 }}
                                     className="mt-5 text-center space-y-2"
                                 >
-                                    <p className="text-sm text-gray-600">
-                                        Don't have an account?{' '}
-                                        <Link to={registerRoute} className="text-blue-600 hover:text-blue-700 transition-colors">
-                                            Sign up here
-                                        </Link>
-                                    </p>
-                                    <p className="text-sm text-gray-600">
-                                        {alternativeTitle}{' '}
-                                        <Link to={alternativeRoute} className="text-blue-600 hover:text-blue-700 transition-colors">
-                                            Log in here
-                                        </Link>
-                                    </p>
                                 </motion.div>
                             </motion.div>
                         </div>
                     </ScrollArea>
                 </Card>
             </motion.div>
-            <Toaster position="top-center" />
+            <Toaster theme={theme} position="top-center" />
         </AnimatePresence>
     );
 };

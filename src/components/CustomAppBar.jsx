@@ -35,12 +35,16 @@ import {
     ShoppingBag,
     Package,
     MinusCircle,
-    Grid
+    Grid,
+    Moon,
+    Sun
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import Logo from '@/assets/logotrans.png';
+import LogoInv from '@/assets/logoinv.png';
 import { toast } from "sonner";
+import { useTheme } from "@/providers/theme-provider"
 
 const CustomAppBar = ({ 
     userInfoEndpoint,
@@ -51,6 +55,7 @@ const CustomAppBar = ({
     userType = 1,
     isLandingPage = false
 }) => {
+    const { theme, setTheme } = useTheme();
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -274,7 +279,7 @@ const CustomAppBar = ({
     return (
         <motion.header 
             className={cn(
-                "sticky top-0 z-50 w-full border-b bg-white",
+                "sticky top-0 z-50 w-full border-b bg-background",
                 className
             )}
             initial={{ y: -100 }}
@@ -285,11 +290,11 @@ const CustomAppBar = ({
                 <div className="flex items-center space-x-6 pl-4">
                     <Button 
                         variant="ghost" 
-                        className="hidden md:flex items-center space-x-2 p-0"
+                        className="hidden md:flex items-center space-x-2 p-0 hover:bg-transparent"
                         onClick={() => handleNavigate(isLandingPage ? "/" : homeRoute)}
                     >
                         <img 
-                            src={Logo} 
+                            src={theme === 'dark' ? LogoInv : Logo} 
                             alt="Librova Logo" 
                             className="h-10 w-auto object-contain"
                         />
@@ -414,7 +419,21 @@ const CustomAppBar = ({
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-4 pr-4">
+                <div className="flex items-center gap-4">
+                    {/* Theme toggle button */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                        className="w-9 h-9 px-0 dark:hover:bg-muted dark:hover:text-foreground dark:text-foreground"
+                    >
+                        {theme === 'light' ? (
+                            <Moon className="h-4 w-4" />
+                        ) : (
+                            <Sun className="h-4 w-4" />
+                        )}
+                    </Button>
+                    
                     {/* Cart Button with Popover - Only shown for users */}
                     {isUser && !isLandingPage && (
                         <Popover>
@@ -422,7 +441,7 @@ const CustomAppBar = ({
                                 <Button 
                                     variant="ghost" 
                                     size="icon"
-                                    className="relative hover:bg-transparent bg-transparent"
+                                    className="relative hover:bg-accent"
                                 >
                                     <ShoppingCart className="h-5 w-5" />
                                     <Badge 
@@ -444,7 +463,7 @@ const CustomAppBar = ({
                                         <Button 
                                             variant="ghost" 
                                             size="sm"
-                                            className="gap-2 text-muted-foreground hover:text-primary"
+                                            className="gap-2 text-muted-foreground hover:text-foreground"
                                             onClick={() => handleNavigate('/user/checkout')}
                                         >
                                             <ShoppingBag className="h-4 w-4" />
@@ -471,7 +490,7 @@ const CustomAppBar = ({
                                                 <p className="text-sm">Your cart is empty</p>
                                                 <Button 
                                                     variant="link" 
-                                                    className="mt-2"
+                                                    className="mt-2 text-primary hover:text-primary/80"
                                                     onClick={() => handleNavigate('/books')}
                                                 >
                                                     Browse Books
@@ -614,16 +633,20 @@ const CustomAppBar = ({
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -300 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 md:hidden"
+                        className="fixed inset-y-0 left-0 w-64 bg-background border-r shadow-lg z-50 md:hidden"
                     >
                         <div className="flex flex-col h-full p-4">
                             <div className="flex items-center justify-between mb-8">
-                                <img src={Logo} alt="Librova Logo" className="h-8 w-auto" />
+                                <img 
+                                    src={theme === 'dark' ? LogoInv : Logo} 
+                                    alt="Librova Logo" 
+                                    className="h-8 w-auto" 
+                                />
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="hover:bg-transparent"
+                                    className="hover:bg-accent"
                                 >
                                     <Menu className="h-5 w-5" />
                                 </Button>
@@ -633,7 +656,7 @@ const CustomAppBar = ({
                                     <Button
                                         key={item.path}
                                         variant="ghost"
-                                        className="flex items-center justify-start space-x-2 w-full hover:bg-transparent bg-transparent"
+                                        className="flex items-center justify-start space-x-2 w-full hover:bg-accent hover:text-accent-foreground"
                                         onClick={() => handleNavigate(item.path)}
                                     >
                                         <item.icon className="h-4 w-4" />
