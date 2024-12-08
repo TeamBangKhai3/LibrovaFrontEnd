@@ -1,4 +1,3 @@
-
 import React from 'react';
 import RegisterForm from '../components/RegisterForm';
 
@@ -8,6 +7,7 @@ const PublisherRegister = () => {
     return (
         <RegisterForm
             registerEndpoint={`${backendUrl}/authpublisher/register`}
+            otpEndpoint="/authpublisher/registerwithotp"
             redirectRoute="/publisher/home"
             title="Publisher Register"
             loginRoute="/publisher/login"

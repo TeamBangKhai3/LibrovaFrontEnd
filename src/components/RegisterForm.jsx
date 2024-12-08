@@ -49,7 +49,7 @@ const OtpSchema = z.object({
     otp: z.string().min(6, { message: "OTP must be 6 digits" }).max(6, { message: "OTP must be 6 digits" }),
 });
 
-const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) => {
+const RegisterForm = ({ registerEndpoint, otpEndpoint, redirectRoute, title, loginRoute }) => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -88,9 +88,6 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
 
         setIsLoading(true);
         try {
-            // First check if username or email exists
-            await axios.post(`${backendUrl}/authuser/checkuser`, data);
-            
             // If no error thrown, proceed with registration
             setRegistrationData(data);
             const response = await axios.post(registerEndpoint, data);
@@ -149,7 +146,7 @@ const RegisterForm = ({ registerEndpoint, redirectRoute, title, loginRoute }) =>
         setIsLoading(true);
         try {
             const response = await axios.post(
-                `${backendUrl}/authuser/registerwithotp/${otpData.otp}`, 
+                `${backendUrl}${otpEndpoint}/${otpData.otp}`, 
                 registrationData
             );
             handleSuccessfulRegistration(response.data);

@@ -8,6 +8,7 @@ const UserRegister = () => {
     return (
         <RegisterForm
             registerEndpoint={`${backendUrl}/authuser/register`}
+            otpEndpoint="/authuser/registerwithotp"
             redirectRoute="/user/home"
             title="User Register"
             loginRoute="/user/login"
