@@ -55,6 +55,7 @@
     "react-confetti": "^6.1.0",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.2",
+    "react-phone-number-input": "^3.4.10",
     "react-query": "^3.39.3",
     "react-reader": "^2.0.11",
     "react-router-dom": "^6.27.0",

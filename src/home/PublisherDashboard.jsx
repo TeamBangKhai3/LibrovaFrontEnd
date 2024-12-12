@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, Button } from "@mui/material";
 import CustomAppBar from '../components/CustomAppBar';
 import CustomBreadcrumbs from '../components/CustomBreadcrumbs';
@@ -8,6 +8,14 @@ import { useNavigate } from 'react-router-dom';
 export default function PublisherDashboard() {
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    useEffect(() => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken) {
+            navigate('/publisher/login');
+            return;
+        }
+    }, [navigate]);
 
     const breadcrumbLinks = [
         { label: 'Publisher', path: '/publisher/home' },

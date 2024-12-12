@@ -11,6 +11,7 @@ import UserAccountSetting from "./home/UserAccountSetting.jsx";
 import BookmarksPage from "./pages/BookmarksPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import CategoriesPage from './pages/CategoriesPage'
+import PurchaseHistoryPage from './pages/PurchaseHistoryPage'
 
 import PublisherDashboard from "./home/PublisherDashboard.jsx";
 import PublisherLogin from  "./forms/PublisherLogin.jsx";
@@ -44,6 +45,7 @@ createRoot(document.getElementById('root')).render(
                     <Route path="/user/home/ebookinfo/:id" element={<UserProductView/>} />
                     <Route path="user/read/:id" element={<ReadBook />} />
                     <Route path="/user/checkout" element={<CheckoutPage />} />
+                    <Route path="/user/purchases" element={<PurchaseHistoryPage />} />
                     <Route path="/publisher/login" element={<PublisherLogin/>} />
                     <Route path="/publisher/register" element={<PublisherRegister/>} />
                     <Route path="/publisher/home" element={<PublisherDashboard/>} />

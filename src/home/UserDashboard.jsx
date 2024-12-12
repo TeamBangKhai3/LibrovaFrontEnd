@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography } from "@mui/material";
 import CustomAppBar from '../components/CustomAppBar';
 import CustomBreadcrumbs from '../components/CustomBreadcrumbs';
@@ -10,6 +10,14 @@ export default function UserDashboard() {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     document.title = "Homepage | Librova";
+
+    useEffect(() => {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (!sessionToken) {
+            navigate('/user/login');
+            return;
+        }
+    }, [navigate]);
 
     const breadcrumbLinks = [
         { label: 'User', path: '/user/home' },

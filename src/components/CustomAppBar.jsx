@@ -594,6 +594,12 @@ const CustomAppBar = ({
                                         <Settings className="mr-2 h-4 w-4" />
                                         <span>Settings</span>
                                     </DropdownMenuItem>
+                                    {isUser && (
+                                        <DropdownMenuItem onClick={() => handleNavigate('/user/purchases')}>
+                                            <ShoppingBag className="mr-2 h-4 w-4" />
+                                            <span>Purchase History</span>
+                                        </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem 
                                         className="text-red-500 focus:text-red-500" 

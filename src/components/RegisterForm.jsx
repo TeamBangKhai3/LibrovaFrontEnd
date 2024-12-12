@@ -41,7 +41,7 @@ const FormSchema = z.object({
     confirmPassword: z.string().min(8, { message: "Confirm Password is required" }),
     email: z.string().email({ message: "Email is invalid" }),
     address: z.string().min(1, { message: "Address is required" }),
-    phoneNumber: z.string().min(1, { message: "Phone Number is required" }),
+    phoneNumber: z.string().nullable().optional(),
     name: z.string().min(1, { message: "Name is required" }),
 });
 
@@ -66,7 +66,7 @@ const RegisterForm = ({ registerEndpoint, otpEndpoint, redirectRoute, title, log
             confirmPassword: '',
             email: '',
             address: '',
-            phoneNumber: '',
+            phoneNumber: null,
             name: '',
         },
     });
@@ -258,8 +258,8 @@ const RegisterForm = ({ registerEndpoint, otpEndpoint, redirectRoute, title, log
                                                         <PhoneInput
                                                             international
                                                             defaultCountry="PH"
-                                                            value={field.value}
-                                                            onChange={field.onChange}
+                                                            value={field.value || ""}
+                                                            onChange={(value) => field.onChange(value || "")}
                                                             disabled={isLoading}
                                                             className="flex"
                                                             inputComponent={Input}

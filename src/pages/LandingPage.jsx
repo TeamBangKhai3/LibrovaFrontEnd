@@ -60,7 +60,7 @@ const LandingPage = () => {
               >
                 <div className="space-y-4">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Books Shouldn't Be This Locked Down 🔒
+                    Books Shouldn't Be This Locked Down 
                   </h1>
                   <p className="text-gray-500 md:text-xl dark:text-gray-400">
                     Connect with publishers, discover new books, and yours to own forever. Join our growing community of readers and publishers.
@@ -76,8 +76,7 @@ const LandingPage = () => {
                   </Button>
                 </div>
               </motion.div>
-              
-              <motion.div
+　　 　 　 　 <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -216,7 +215,7 @@ const LandingPage = () => {
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-200">
                               <span className="text-2xl font-bold text-gray-400">
-                                {publisher.name.charAt(0).toUpperCase()}
+                                {publisher.name && publisher.name.length > 0 ? publisher.name.charAt(0).toUpperCase() : '?'}
                               </span>
                             </div>
                           )}
